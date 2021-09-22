@@ -77,33 +77,37 @@ namespace IPCams {
 
         }
 
+        //private LibVLCSharp.WinForms.VideoView videoView1;
+        //private Janela videoView2;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+
         #endregion
+
         int current_c = 0;
         int current_r = 0;
 
         public void AddGrid() {
-            Core.Initialize();
             //load params
 
             //cria janelas carregadas, tamanho e local 
 
             //calcula com 16*9 divisao do rectangulo actual
-            double h = this.Width / this.Height * (16 / 9);
-            double v = this.Height / this.Width * (9 / 16);
+            double h = this.Width / (this.Height * (16F / 9F));
+            double v = this.Height / (this.Width * (9F / 16F));
             int c = (int)(Math.Sqrt(ipcams.Length) + .999); int r = (int)(Math.Sqrt(ipcams.Length) + .999);
-            if (h > v+1) { 
+            if (h > v + 1) { 
                 c = (int)(Math.Sqrt(ipcams.Length) + .999) + (int)Math.Truncate(h - v);
                 r = (int)(Math.Truncate(ipcams.Length / c +.999));
+                if (r==0) r = 1;
             }
-            else if (v > h+1) {
+            if (v > h + 1) {
                 r = (int)(Math.Sqrt(ipcams.Length) + .999) + (int)Math.Truncate(v - h);
                 c = (int)(Math.Truncate(ipcams.Length / r + .999));
+                if (c == 0) c = 1;
             }
 
-            //c = (int)(Math.Sqrt(ipcams.Length) + .999);
-            //int ct = (int)Math.Sqrt(ipcams.Length);
-            //r = (int)(ct + (ipcams.Length > c * ct ? 1 : 0));
-
+            Console.WriteLine (r +","+ c);
 
             if (current_r != r && current_c != c) {
                 //clean
@@ -113,61 +117,70 @@ namespace IPCams {
                         tableLayoutPanel1.Controls.Remove(control);
                     }
                 }
-
+                tableLayoutPanel1.ColumnStyles.Clear();
+                tableLayoutPanel1.RowStyles.Clear();
 
                 tableLayoutPanel1.ColumnCount = c;
                 tableLayoutPanel1.RowCount = r;
 
                 tableLayoutPanel1.BackColor = SystemColors.Desktop;
-                tableLayoutPanel1.Location = new Point(0, 0);
+                //tableLayoutPanel1.Anchor = ((AnchorStyles)((((AnchorStyles.Top | AnchorStyles.Bottom)
+                //    | AnchorStyles.Left)
+                //    | AnchorStyles.Right)));
                 tableLayoutPanel1.Name = "Painel";
-
+                //add rows and 
+                float pc = 100 / c ;
                 for (int i = 0; i < c; i++) {
-                    tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, (float)(100 / (r+1))));
+                    tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, pc));
                 }
-                tableLayoutPanel1.ColumnStyles.Clear();
+                float pr = 100 / r;
                 for (int i = 0; i < r; i++) {
-                    tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, (float)(100 / (c+1))));
+                    tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, pr));
                 }
-                tableLayoutPanel1.Size = new System.Drawing.Size(621, 355);
+                //tableLayoutPanel1.Size = new System.Drawing.Size(621, 355);
                 tableLayoutPanel1.TabIndex = 1;
                 tableLayoutPanel1.Dock = DockStyle.Fill;
+
+                //fill cams
                 int wc = 0; int wr = 0;
-
-                cam = new Janela[ipcams.Length];
                 for (int i = 0; i < ipcams.Length; i++) {
-                    cam[i] = new Janela();
-                    cam[i].Location = new System.Drawing.Point(0, 0);
-                    cam[i].Name = "videoView_" + i;
-                    cam[i].BackColor = System.Drawing.Color.Blue;
-                    cam[i].Size = new System.Drawing.Size(100, 100);
-                    cam[i].Dock = DockStyle.Fill;
-                    cam[i].TabIndex = 0;
-                    cam[i].Click += new System.EventHandler(this.videoView_Click);
                     tableLayoutPanel1.Controls.Add(cam[i], wc, wr);
-                    Console.WriteLine("c:" + wc + " r:" + wr);
-
-                    ((System.ComponentModel.ISupportInitialize)(cam[i])).EndInit();
-
                     wc++;
                     if (wc >= c) {
                         wc = 0; wr++;
                     }
                 }
 
-                for (int i = 0; i < ipcams.Length; i++) {
-                    cam[i].init(GrokCmd(ipcams[i]));
-                }
             }
-            current_r =r;
-            current_c=c;
+            current_r = r;
+            current_c = c;
 
             ResumeLayout(true);
         }
-        //private LibVLCSharp.WinForms.VideoView videoView1;
-        //private Janela videoView2;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+    
+
+        public void SetCams() {
+            Core.Initialize();
+
+            cam = new Janela[ipcams.Length];
+            for (int i = 0; i<ipcams.Length; i++) {
+                cam[i] = new Janela();
+                cam[i].Location = new System.Drawing.Point(0, 0);
+                cam[i].Name = "videoView_" + i;
+                cam[i].BackColor = System.Drawing.Color.Blue;
+                cam[i].Size = new System.Drawing.Size(100, 100);
+                cam[i].Dock = DockStyle.Fill;
+                cam[i].TabIndex = 0;
+                cam[i].Click += new System.EventHandler(this.videoView_Click);
+   
+                ((System.ComponentModel.ISupportInitialize)(cam[i])).EndInit();
+            }
+
+            for (int i = 0; i<ipcams.Length; i++) {
+                cam[i].init(GrokCmd(ipcams[i]));
+            }
+    
+        }
     }
 }
 

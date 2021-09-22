@@ -33,6 +33,7 @@ namespace IPCams {
         
         public Form1() {
             InitializeComponent();
+            SetCams(); 
             AddGrid();
 
 
