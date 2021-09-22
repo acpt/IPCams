@@ -9,14 +9,18 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using LibVLCSharp.Shared;
 using IPTools;
+using System.Threading;
+
+using System.Windows.Automation;
+using System.Diagnostics;
 
 namespace IPCams {
     public partial class Form1 : Form {
 
-        string VIDEO_URL1 = "";
-        string VIDEO_URL2 = "";
-        LibVLC _libvlc;
-        MediaPlayer _mediaPlayer1;
+        //string VIDEO_URL1 = "";
+        //string VIDEO_URL2 = "";
+        //ibVLC _libvlc;
+        //MediaPlayer _mediaPlayer1;
         //MediaPlayer _mediaPlayer2;
         Janela[] cam = null;
 
@@ -29,56 +33,46 @@ namespace IPCams {
         
         public Form1() {
             InitializeComponent();
-            Core.Initialize();
-            //load params
-            
-            //cria janelas carregadas, tamanho e local 
-
-            //calcula com 16*9 divisao do rectangulo actual
-            int c = (int)(Math.Sqrt(ipcams.Length)+.999);
-            int ct = (int)Math.Sqrt(ipcams.Length);
-            int r = (int)(ct + (ipcams.Length > c * ct ? 1 : 0));
-            
-            tableLayoutPanel1.ColumnCount = c;
-            tableLayoutPanel1.RowCount = r;
-            int wc = 0; int wr = 0;
-
-            cam = new Janela[ipcams.Length];
-            for (int i = 0; i < ipcams.Length; i++) {
-                if (wc==0) tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(SizeType.Percent, 50F));
-                cam[i] = new Janela();
-                ((System.ComponentModel.ISupportInitialize)(this.cam[i])).BeginInit();
-                cam[i].init(Funcs.GrokCmd(ipcams[i]));
-                cam[i].Location = new System.Drawing.Point(0, 0);
-                cam[i].Name = "videoView_" + i;
-                cam[i].BackColor = System.Drawing.Color.Red;
-                cam[i].Size = new System.Drawing.Size(200, 200);
-                cam[i].Dock = System.Windows.Forms.DockStyle.Fill;
-                cam[i].TabIndex = 0;
-                cam[i].Click += new System.EventHandler(this.videoView_Click);
-
-                tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle( SizeType.Percent, 50F));
-                tableLayoutPanel1.Controls.Add(cam[i], wc, wr);
-
-                ((System.ComponentModel.ISupportInitialize)(cam[i])).EndInit();
-
-                wc++;
-                if (wc>=c) { 
-                    wc=0; wr++;
-                }
-            }
-            tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ResumeLayout(false);
-
+            AddGrid();
 
 
             //rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=1&subtype=1
             //Sizing(1165,470);
         }
 
-        private void Form1_Load(object sender, EventArgs e) {
+        public string GrokCmd(string cmd) {
+            string ip = cmd;
+  
+            int i = cmd.IndexOf("[");
+            if (i > 0) {
+                string mac = cmd.Substring(i + 1, cmd.IndexOf("]") - i - 1);
+                //IPTools.AutoClosingMessageBox.Show("[" + mac + "]","Procurando...",3000);
+                //Funcs.MessageBoxTimeout((System.IntPtr)0, "[" + mac + "]" , "Procura de Mac's", 0, 0, 2000);
 
-            _libvlc = new LibVLC();
+                ip = IPTools.ARP.GetIPfromMAC(mac);
+                //Funcs.Ping255("192.168.1.1");
+                if (ip == "") {
+                    IPTools.AutoClosingMessageBox.Show("Falhou a procura do mac address [" + mac + "] ! A acordar o Arp","...",7000);
+                    string localIP = Funcs.GetLocalIPAddress();
+                    Funcs.Ping255(localIP);
+                    Thread.Sleep(7000);
+                    //segunda tentativa
+                    ip = IPTools.ARP.GetIPfromMAC(mac);
+                    if (ip == "") { //
+                        IPTools.AutoClosingMessageBox.Show("Não encontrado, tente sair e voltar a entrar", "Procura de Mac's", 5000);
+                        ip = "127.0.0.1";
+                    }
+
+                }
+                ip = cmd.Substring(0, cmd.IndexOf("[")) + ip + cmd.Substring(cmd.IndexOf("]") + 1);
+            }
+            return ip;
+        }
+
+
+        private void Form1_Load(object sender, EventArgs e) {
+            //AddGrid();
+            //_libvlc = new LibVLC();
 
             //_mediaPlayer1 = new MediaPlayer(_libvlc);
             //_mediaPlayer2 = new MediaPlayer(_libvlc);
@@ -101,14 +95,15 @@ namespace IPCams {
     
         private void button1_Click(object sender, EventArgs e) {
             //Sizing();
+            //AdicionaJanela(cmd)
         }
 
         private void videoView_Click(object sender, EventArgs e) {
-            _mediaPlayer1.SetAudioTrack(1);
+            //_mediaPlayer1.SetAudioTrack(1);
         }
 
-        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e) {
-
+        private void Form1_Resize(object sender, EventArgs e) {
+            AddGrid();
         }
     }
 }

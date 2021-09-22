@@ -15,6 +15,7 @@ namespace IPCams {
 
         public void init(string url) {
             URL=url;
+            //if (url=="") return;
             _libvlc = new LibVLC();
 
             _mediaPlayer = new MediaPlayer(_libvlc);

@@ -2,19 +2,66 @@
 using System.Runtime.InteropServices;
 using System.ComponentModel;
 using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace IPTools {
+
+    public class AutoClosingMessageBox {
+        System.Threading.Timer _timeoutTimer;
+        string _caption;
+        AutoClosingMessageBox(string text, string caption, int timeout) {
+            _caption = caption;
+            _timeoutTimer = new System.Threading.Timer(OnTimerElapsed,
+                null, timeout, System.Threading.Timeout.Infinite);
+            MessageBox.Show(text, caption);
+        }
+        public static void Show(string text, string caption, int timeout) {
+            new AutoClosingMessageBox(text, caption, timeout);
+        }
+        void OnTimerElapsed(object state) {
+            IntPtr mbWnd = FindWindow(null, _caption);
+            if (mbWnd != IntPtr.Zero)
+                SendMessage(mbWnd, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
+            _timeoutTimer.Dispose();
+        }
+        const int WM_CLOSE = 0x0010;
+        [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true)]
+        static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+        [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Auto)]
+        static extern IntPtr SendMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lParam);
+    }
+
     public class Funcs {
-        public static string GrokCmd(string cmd) {
-            string rc = cmd;
-            int i = cmd.IndexOf("[");
-            if (i > 0) {
-                string mac = cmd.Substring(i + 1, cmd.IndexOf("]") - i - 1);
-                string ip = IPTools.ARP.GetIPfromMAC(mac);
-                // if ip="" get last found address
-                rc = cmd.Substring(0, i) + ip + cmd.Substring(cmd.IndexOf("]")+1);
+
+
+
+        //[DllImport("user32.dll", SetLastError = true)]
+        //static extern int MessageBoxTimeout(IntPtr hwnd, String text, String title, uint type, Int16 wLanguageId, Int32 milliseconds);
+        
+        public static void Ping255(string localIP) {
+            for (int i=1; i<256; i++) {
+                Ping p = new Ping();
+                p.SendAsync(localIP.Substring(0,localIP.LastIndexOf(".") + 1) + i, 1);
+                //p.Send(localIP.Substring(0, localIP.LastIndexOf(".") + 1) + i, 1);
+                Console.WriteLine(i);
+                //p.SendAsyncCancel(); //cagaiting mode
             }
-            return rc;
+        }
+        public static string GetLocalIPAddress() {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList) {
+                if (ip.AddressFamily == AddressFamily.InterNetwork) {
+                    return ip.ToString();
+                }
+            }
+            throw new Exception("No network adapters with an IPv4 address in the system!");
+        }
+
+        internal static int MessageBoxTimeout(IntPtr intPtr, string v1, string v2, int v3, int v4, int v5) {
+            throw new NotImplementedException();
         }
     }
     static class  ARP {
