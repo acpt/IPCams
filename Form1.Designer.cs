@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using LibVLCSharp.Shared;
-using IPTools;
+using Tools;
 using System.Threading;
 
 namespace IPCams {
@@ -36,8 +36,18 @@ namespace IPCams {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
+            this.components = new System.ComponentModel.Container();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.button1 = new System.Windows.Forms.Button();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.addCamToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.remCamToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.editCamToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.moveUpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.moveDownToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.muteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -49,15 +59,65 @@ namespace IPCams {
             this.tableLayoutPanel1.Size = new System.Drawing.Size(621, 355);
             this.tableLayoutPanel1.TabIndex = 5;
             // 
-            // button1
+            // contextMenuStrip1
             // 
-            this.button1.Location = new System.Drawing.Point(0, 0);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(24, 22);
-            this.button1.TabIndex = 4;
-            this.button1.Text = "+";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.addCamToolStripMenuItem,
+            this.remCamToolStripMenuItem,
+            this.editCamToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.moveUpToolStripMenuItem,
+            this.moveDownToolStripMenuItem,
+            this.toolStripSeparator2,
+            this.muteToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(139, 148);
+            // 
+            // addCamToolStripMenuItem
+            // 
+            this.addCamToolStripMenuItem.Name = "addCamToolStripMenuItem";
+            this.addCamToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
+            this.addCamToolStripMenuItem.Text = "Add Cam";
+            // 
+            // remCamToolStripMenuItem
+            // 
+            this.remCamToolStripMenuItem.Name = "remCamToolStripMenuItem";
+            this.remCamToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
+            this.remCamToolStripMenuItem.Text = "Del Cam";
+            // 
+            // editCamToolStripMenuItem
+            // 
+            this.editCamToolStripMenuItem.Name = "editCamToolStripMenuItem";
+            this.editCamToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
+            this.editCamToolStripMenuItem.Text = "Edit Cam";
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(135, 6);
+            // 
+            // moveUpToolStripMenuItem
+            // 
+            this.moveUpToolStripMenuItem.Name = "moveUpToolStripMenuItem";
+            this.moveUpToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
+            this.moveUpToolStripMenuItem.Text = "Move Up";
+            // 
+            // moveDownToolStripMenuItem
+            // 
+            this.moveDownToolStripMenuItem.Name = "moveDownToolStripMenuItem";
+            this.moveDownToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
+            this.moveDownToolStripMenuItem.Text = "Move Down";
+            // 
+            // muteToolStripMenuItem
+            // 
+            this.muteToolStripMenuItem.Name = "muteToolStripMenuItem";
+            this.muteToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
+            this.muteToolStripMenuItem.Text = "Mute/UnMute";
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(135, 6);
             // 
             // Form1
             // 
@@ -66,28 +126,31 @@ namespace IPCams {
             this.AutoValidate = System.Windows.Forms.AutoValidate.EnableAllowFocusChange;
             this.BackColor = System.Drawing.SystemColors.GrayText;
             this.ClientSize = new System.Drawing.Size(621, 355);
-            this.Controls.Add(this.button1);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "Form1";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
             this.Text = "AC Viewer";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.Resize += new System.EventHandler(this.Form1_Resize);
+            this.contextMenuStrip1.ResumeLayout(false);
+            this.contextMenuStrip1.ItemClicked += new ToolStripItemClickedEventHandler(ContextMenuStrip_click);
             this.ResumeLayout(false);
 
+            //this.ContextMenuStrip = contextMenuStrip1;
         }
-
-        //private LibVLCSharp.WinForms.VideoView videoView1;
-        //private Janela videoView2;
-        private System.Windows.Forms.Button button1;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
 
         #endregion
 
+
+
+
+
         int current_c = 0;
         int current_r = 0;
+        int current_cams = 0;
 
-        public void AddGrid() {
+        public void DoGrid(bool force=false) {
             //load params
 
             //cria janelas carregadas, tamanho e local 
@@ -95,28 +158,24 @@ namespace IPCams {
             //calcula com 16*9 divisao do rectangulo actual
             double h = this.Width / (this.Height * (16F / 9F));
             double v = this.Height / (this.Width * (9F / 16F));
-            int c = (int)(Math.Sqrt(ipcams.Length) + .999); int r = (int)(Math.Sqrt(ipcams.Length) + .999);
+            int c = (int)(Math.Sqrt(cam.Count) + .999); int r = (int)(Math.Sqrt(cam.Count) + .999);
             if (h > v + 1) { 
-                c = (int)(Math.Sqrt(ipcams.Length) + .999) + (int)Math.Truncate(h - v);
-                r = (int)(Math.Truncate(ipcams.Length / c +.999));
+                c = (int)(Math.Sqrt(cam.Count) + .999) + (int)Math.Truncate(h - v);
+                r = (int)(Math.Truncate(cam.Count / c +.999));
                 if (r==0) r = 1;
             }
             if (v > h + 1) {
-                r = (int)(Math.Sqrt(ipcams.Length) + .999) + (int)Math.Truncate(v - h);
-                c = (int)(Math.Truncate(ipcams.Length / r + .999));
+                r = (int)(Math.Sqrt(cam.Count) + .999) + (int)Math.Truncate(v - h);
+                if (r > cam.Count) { r = cam.Count;}                
+                c = (int)(Math.Truncate(cam.Count / r + .999));
                 if (c == 0) c = 1;
             }
+            if (cam.Count == c) { r = 1; }
 
-            Console.WriteLine (r +","+ c);
+            Console.WriteLine ("DoGrid " + r +","+ c);
 
-            if (current_r != r && current_c != c) {
-                //clean
-                for (int ii = 0; ii < current_r; ii++) {
-                    for (int i = 0; i < current_c; i++) {
-                        var control = tableLayoutPanel1.GetControlFromPosition(i, ii);
-                        tableLayoutPanel1.Controls.Remove(control);
-                    }
-                }
+            if ((current_r != r && current_c != c) || force ){
+                tableLayoutPanel1.Controls.Clear();
                 tableLayoutPanel1.ColumnStyles.Clear();
                 tableLayoutPanel1.RowStyles.Clear();
 
@@ -124,9 +183,6 @@ namespace IPCams {
                 tableLayoutPanel1.RowCount = r;
 
                 tableLayoutPanel1.BackColor = SystemColors.Desktop;
-                //tableLayoutPanel1.Anchor = ((AnchorStyles)((((AnchorStyles.Top | AnchorStyles.Bottom)
-                //    | AnchorStyles.Left)
-                //    | AnchorStyles.Right)));
                 tableLayoutPanel1.Name = "Painel";
                 //add rows and 
                 float pc = 100 / c ;
@@ -143,7 +199,11 @@ namespace IPCams {
 
                 //fill cams
                 int wc = 0; int wr = 0;
-                for (int i = 0; i < ipcams.Length; i++) {
+                for (int i = 0; i < cam.Count; i++) {
+                    cam[i].Name = "videoView " + i; //name here case of moves - number is used to get position
+                    if (cam[i].MediaPlayer == null ) {
+                        cam[i].init(GrokCmd(cam[i].Text));
+                    }
                     tableLayoutPanel1.Controls.Add(cam[i], wc, wr);
                     wc++;
                     if (wc >= c) {
@@ -159,28 +219,62 @@ namespace IPCams {
         }
     
 
-        public void SetCams() {
+        public void LoadCams() {
+            //if (inicializado) 
             Core.Initialize();
 
-            cam = new Janela[ipcams.Length];
-            for (int i = 0; i<ipcams.Length; i++) {
-                cam[i] = new Janela();
-                cam[i].Location = new System.Drawing.Point(0, 0);
-                cam[i].Name = "videoView_" + i;
-                cam[i].BackColor = System.Drawing.Color.Blue;
-                cam[i].Size = new System.Drawing.Size(100, 100);
-                cam[i].Dock = DockStyle.Fill;
-                cam[i].TabIndex = 0;
-                cam[i].Click += new System.EventHandler(this.videoView_Click);
-   
-                ((System.ComponentModel.ISupportInitialize)(cam[i])).EndInit();
+            //cam = new Janela[ipcams.Count];
+            cam = new List<Janela>();
+            o_x = new double[Loadipcams.Count];
+            o_y = new double[Loadipcams.Count];
+            o_s = new double[Loadipcams.Count];
+            //panel = new Panel[ipcams.Length];
+            for (int i = 0; i< Loadipcams.Count; i++) {                
+                cam.Add(new Janela());
+                JanelaDefaults(cam[i], GrokCmd(Loadipcams[i]));
+                //((System.ComponentModel.ISupportInitialize)(cam[i]).EndInit()));
+
+
+                //panel[i] = new Panel();
+                ////panel[i].Controls.Add(cam[i]);
+                //panel[i].Dock = DockStyle.Fill;
+                //panel[i].BackColor = Color.Transparent;                
+                //panel[i].ContextMenuStrip = contextMenuStrip1;
+
+                //cam[i].Controls.Add(panel[i]);
+                //panel[i].BringToFront();
             }
 
-            for (int i = 0; i<ipcams.Length; i++) {
-                cam[i].init(GrokCmd(ipcams[i]));
+            for (int i = 0; i< Loadipcams.Count; i++) {
+                cam[i].init(GrokCmd(Loadipcams[i]));
             }
     
         }
+
+        public void JanelaDefaults(Janela j, string url) {
+
+            j.Location = new System.Drawing.Point(0, 0);
+            //cam[i].Name = "videoView " + i;
+            j.BackColor = System.Drawing.Color.Blue;
+            j.Size = new System.Drawing.Size(100, 100);
+            j.Dock = DockStyle.Fill;
+            j.TabIndex = 0;
+            j.Click += new System.EventHandler(this.videoView_Click);
+            j.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.videoView_MouseWheel);
+
+            j.ContextMenuStrip = contextMenuStrip1;
+            j.Text = GrokCmd(url);
+
+        }
+        private ContextMenuStrip contextMenuStrip1;
+        private ToolStripMenuItem addCamToolStripMenuItem;
+        private ToolStripMenuItem remCamToolStripMenuItem;
+        private ToolStripMenuItem editCamToolStripMenuItem;
+        private ToolStripSeparator toolStripSeparator1;
+        private ToolStripMenuItem moveUpToolStripMenuItem;
+        private ToolStripMenuItem moveDownToolStripMenuItem;
+        private ToolStripSeparator toolStripSeparator2;
+        private ToolStripMenuItem muteToolStripMenuItem;
     }
 }
 
