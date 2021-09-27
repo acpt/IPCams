@@ -23,16 +23,21 @@ namespace IPCams {
         //MediaPlayer _mediaPlayer1;
         //MediaPlayer _mediaPlayer2;
         List<Janela> cam = null;
-        double[] o_x = null;
-        double[] o_y = null;
-        double[] o_s = null;
         //Panel[] panel = null;
 
         //from args or param file... or added and saved
         List<string> Loadipcams = new List<string> { 
-            "rtsp://nvrviewer:armgames@[c0-c9-e3-dd-0c-00]:554/stream1",
-            "rtsp://nvrviewer:armgames@[28-ee-52-93-33-e0]:554/stream1",
-            "rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=1&subtype=1" 
+            //"rtsp://nvrviewer:armgames@[c0-c9-e3-dd-0c-00]:554/stream1",
+            //"rtsp://nvrviewer:armgames@[28-ee-52-93-33-e0]:554/stream1",
+            "rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=1&subtype=1",
+            "rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=2&subtype=1",
+            "rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=3&subtype=1",
+            "rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=4&subtype=1",
+            "rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=5&subtype=1",
+            "rtsp://armando:Arm2018%@aced.dyndns.info:554/cam/realmonitor?channel=1&subtype=1",
+            "rtsp://armando:Arm2018%@aced.dyndns.info:554/cam/realmonitor?channel=2&subtype=1",
+            "rtsp://armando:Arm2018%@aced.dyndns.info:554/cam/realmonitor?channel=3&subtype=1",
+            "rtsp://armando:Arm2018%@aced.dyndns.info:554/cam/realmonitor?channel=4&subtype=1"
         };
         
         public Form1() {
@@ -124,25 +129,31 @@ namespace IPCams {
                 
                 //restaura s - para a escala
                 //s = (double)w / (double)ow;
-                ow = (int)o_x[i];
-                s = o_s[i];
-                Console.WriteLine(s);
+                ox = cam[i].x;
+                oy = cam[i].y;
+                ow = cam[i].w;
+                oh = cam[i].h;
+                s = cam[i].s;
             }
-            s = (double)s + (double)me.Delta / (double)2000;
+            s = s - (double)me.Delta / (double)2000; //zoom rato/2000
+
             x = (int)Math.Round((double)me.X * (double)w / (double)vw); //traduz para a posicao real no video
             y = (int)Math.Round((double)me.Y * (double)h / (double)vh); //traduz para a posicao real no video
 
             if (s < 0.16 ) { s = 0.16; }
-            if (s > 1) { s = 1; x = (int)w / 2; y = (int)h / 2;}
+            if (s > 1) { s = 1;  x = 1; y = 1;}
 
-            o_s[i] = s;
-            o_x[i] = (double)s * w;
             ///
-
             int mx = (int)(y - (double)w * s / 2); // centra janela no x
             int my = (int)(y - (double)h * s / 2); // centra janela no y
 
-            string CropStr = (int)( Math.Truncate((double)s * w)) + "x" + (int)(Math.Truncate((double)(s * w) / w  * h)) + "+" + mx + "+" + my;
+            cam[i].s = s;
+            cam[i].x = x;
+            cam[i].y = y;
+            cam[i].w = (int)(Math.Truncate((double)(s * w))) + x;
+            cam[i].h = (int)(Math.Truncate((double)(s * w) / w * h)) + y;
+
+            string CropStr = cam[i].w + "x" + cam[i].h + "+" + x + "+" + y;
             mp.CropGeometry = CropStr;
             Console.WriteLine("w" + w +"x" + h + "  (" + x + ", " + y + ")  Delta:" + me.Delta + " s=" + (double)s + "   CROP= "+ cg + " " + CropStr);
 
@@ -173,13 +184,13 @@ namespace IPCams {
             switch (e.ClickedItem.Text) {
                 case "Add Cam":
                     if (Tools.Funcs.ShowDialog(ref camRstp, "Add Camera") == DialogResult.OK) {
-                        cam.Insert(i, new Janela());
-                        JanelaDefaults(cam[i], GrokCmd(camRstp));
+                        cam.Insert(i + 1, new Janela());
+                        JanelaDefaults(cam[i + 1], GrokCmd(camRstp));
                         DoGrid(true);
                     }
                     break;
                 case "Del Cam":
-                    camRstp = "Delete Cam[" + cam[i].URL +  "] ? ";
+                    camRstp = "Delete Cam[" + cam[i].Text +  "] ? ";
                     if (Tools.Funcs.ShowDialog(ref camRstp, "Atention", false)==DialogResult.OK) {
                         cam[i].MediaPlayer.Stop();
                         cam[i].MediaPlayer.Dispose();

@@ -9,6 +9,12 @@ namespace IPCams {
 
     public partial class Janela: LibVLCSharp.WinForms.VideoView {
         public string URL;
+        public int x = 0;
+        public int y = 0;
+        public int w = 0;
+        public int h = 0;
+        public double s=1;
+
         LibVLC _libvlc;
         MediaPlayer _mediaPlayer;
 
@@ -19,6 +25,8 @@ namespace IPCams {
             _libvlc = new LibVLC();
 
             _mediaPlayer = new MediaPlayer(_libvlc);
+            _mediaPlayer.EnableHardwareDecoding = true;
+            _mediaPlayer.AspectRatio = "16:9";
             _mediaPlayer.EnableMouseInput = false;
             _mediaPlayer.EnableKeyInput = false;
 

@@ -158,6 +158,8 @@ namespace IPCams {
             //calcula com 16*9 divisao do rectangulo actual
             double h = this.Width / (this.Height * (16F / 9F));
             double v = this.Height / (this.Width * (9F / 16F));
+
+            Console.WriteLine("h:" + h.ToString("n2")+ " v:" + v.ToString("n2"));
             int c = (int)(Math.Sqrt(cam.Count) + .999); int r = (int)(Math.Sqrt(cam.Count) + .999);
             if (h > v + 1) { 
                 c = (int)(Math.Sqrt(cam.Count) + .999) + (int)Math.Truncate(h - v);
@@ -170,7 +172,7 @@ namespace IPCams {
                 c = (int)(Math.Truncate(cam.Count / r + .999));
                 if (c == 0) c = 1;
             }
-            if (cam.Count == c) { r = 1; }
+            if (c * r - cam.Count >= c) { r = r - 1; }
 
             Console.WriteLine ("DoGrid " + r +","+ c);
 
@@ -225,9 +227,6 @@ namespace IPCams {
 
             //cam = new Janela[ipcams.Count];
             cam = new List<Janela>();
-            o_x = new double[Loadipcams.Count];
-            o_y = new double[Loadipcams.Count];
-            o_s = new double[Loadipcams.Count];
             //panel = new Panel[ipcams.Length];
             for (int i = 0; i< Loadipcams.Count; i++) {                
                 cam.Add(new Janela());
