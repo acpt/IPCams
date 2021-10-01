@@ -22,32 +22,34 @@ namespace IPCams {
         //ibVLC _libvlc;
         //MediaPlayer _mediaPlayer1;
         //MediaPlayer _mediaPlayer2;
-        List<Janela> cam = null;
+        List<Janela> cam = new List<Janela>();
         //Panel[] panel = null;
 
         //from args or param file... or added and saved
-        List<string> Loadipcams = new List<string> { 
+        List<string> Loadipcams = new List<string>(); // { 
             //"rtsp://nvrviewer:armgames@[c0-c9-e3-dd-0c-00]:554/stream1",
             //"rtsp://nvrviewer:armgames@[28-ee-52-93-33-e0]:554/stream1",
-            "rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=1&subtype=1",
-            "rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=2&subtype=1",
-            "rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=3&subtype=1",
-            "rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=4&subtype=1",
-            "rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=5&subtype=1",
-            "rtsp://armando:Arm2018%@aced.dyndns.info:554/cam/realmonitor?channel=1&subtype=1",
-            "rtsp://armando:Arm2018%@aced.dyndns.info:554/cam/realmonitor?channel=2&subtype=1",
-            "rtsp://armando:Arm2018%@aced.dyndns.info:554/cam/realmonitor?channel=3&subtype=1",
-            "rtsp://armando:Arm2018%@aced.dyndns.info:554/cam/realmonitor?channel=4&subtype=1"
-        };
+            //"rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=1&subtype=1",
+            //"rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=2&subtype=1",
+            ////"rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=3&subtype=1",
+            ////"rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=4&subtype=1",
+            ////"rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=5&subtype=1",
+            ////"rtsp://armando:Arm2018%@aced.dyndns.info:554/cam/realmonitor?channel=1&subtype=1",
+            ////"rtsp://armando:Arm2018%@aced.dyndns.info:554/cam/realmonitor?channel=2&subtype=1",
+            //"rtsp://armando:Arm2018%@aced.dyndns.info:554/cam/realmonitor?channel=3&subtype=1",
+            //"rtsp://armando:Arm2018%@aced.dyndns.info:554/cam/realmonitor?channel=4&subtype=1"
+        //};
         
         public Form1() {
             InitializeComponent();
+
+            Funcs.LoadCfg(ref Loadipcams);
+
+            if (Loadipcams.Count == 0) AddCam(-1);
+
             LoadCams(); 
             DoGrid();
 
-
-            //rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=1&subtype=1
-            //Sizing(1165,470);
         }
 
         public string GrokCmd(string cmd) {
@@ -62,7 +64,7 @@ namespace IPCams {
                 ip = Tools.ARP.GetIPfromMAC(mac);
                 //Funcs.Ping255("192.168.1.1");
                 if (ip == "") {
-                    Tools.AutoClosingMessageBox.Show("Falhou a procura do mac address [" + mac + "] ! A acordar o Arp","...",7000);
+                    Tools.AutoClosingMessageBox.Show("Falhou a procura do mac address [" + mac + "] ! A acordar o Arp","...",5000);
                     string localIP = IPFuncs.GetLocalIPAddress();
                     IPFuncs.Ping255(localIP);
                     Thread.Sleep(7000);
@@ -81,92 +83,172 @@ namespace IPCams {
 
 
         private void Form1_Load(object sender, EventArgs e) {
-            //DoGrid();
-            //_libvlc = new LibVLC();
+            this.WindowState = Properties.Settings.Default.F1State;
 
-            //_mediaPlayer1 = new MediaPlayer(_libvlc);
-            //_mediaPlayer2 = new MediaPlayer(_libvlc);
-            //videoView1.MediaPlayer = _mediaPlayer1;
-            //videoView2.MediaPlayer = _mediaPlayer2;
+            // we don't want a minimized window at startup
+            if (this.WindowState == FormWindowState.Minimized) this.WindowState = FormWindowState.Normal;
 
-            //if (VIDEO_URL1 != "") {
-            //    _mediaPlayer1.Play(new Media(_libvlc, new Uri(VIDEO_URL1)));
-            //    _mediaPlayer1.SetAudioTrack(-1);
-
-            //}
-            //if (VIDEO_URL2 != "") {
-            //    videoView2.MediaPlayer.Play(new Media(_libvlc, new Uri(VIDEO_URL2)));
-            //    //_mediaPlayer2.Play(new Media(_libvlc, new Uri(VIDEO_URL2)));
-            //    //_mediaPlayer1.SetAudioTrack(-1);
-            //}
-
+            this.Location = Properties.Settings.Default.F1Location;
+            this.Size = Properties.Settings.Default.F1Size;
         }
 
-        
+        private void Form1_Closing(object sender, FormClosingEventArgs e) {
+            Properties.Settings.Default.F1State = this.WindowState;
+            if (this.WindowState == FormWindowState.Normal) {
+                // save location and size if the state is normal
+                Properties.Settings.Default.F1Location = this.Location;
+                Properties.Settings.Default.F1Size = this.Size;
+            }
+            else {
+                // save the RestoreBounds if the form is minimized or maximized!
+                Properties.Settings.Default.F1Location = this.RestoreBounds.Location;
+                Properties.Settings.Default.F1Size = this.RestoreBounds.Size;
+            }
+
+            // don't forget to save the settings
+            Properties.Settings.Default.Save();
+        }
+
         private void videoView_MouseWheel(object sender, EventArgs e) {
+            double s = 1;
+            double sx = 0.025;
+
             Janela j = (Janela)sender;
             MouseEventArgs me = (MouseEventArgs)e;
             string camera = j.Name;
             int i = Convert.ToInt32(camera.Substring(camera.IndexOf(" ") + 1));
             MediaPlayer mp = cam[i].MediaPlayer;
-            uint n =0; uint w=0; uint h=0;
+            uint n =0; uint w=0; uint h=0;           
             mp.Size(n, ref w, ref h); //Tamanho real do video
             int vw=cam[i].Width; int vh=cam[i].Height; //tamanho da janela 
 
-            int ox=0; int oy=0; int ow=0; int oh=0;
-
-            double s =  1;
+            int ox,oy,ow,oh;
             int x = 0; int y = 0;
 
             string cg = mp.CropGeometry;
+            
             if (cg!=null) {
                 //restaura "x" "y" e tamanhos para calcular o "s" dos settings anteriores
-                //ox = Convert.ToInt32(cg.Substring(cg.LastIndexOf("+") + 1 ));
-                //oy = Convert.ToInt32(cg.Substring(cg.IndexOf("+") + 1, cg.LastIndexOf("+") - cg.IndexOf("+") - 1));
+                oy = Convert.ToInt32(cg.Substring(cg.LastIndexOf("+") + 1 ));
+                ox = Convert.ToInt32(cg.Substring(cg.IndexOf("+") + 1, cg.LastIndexOf("+") - cg.IndexOf("+") - 1));
 
-                //ow = Convert.ToInt32(cg.Substring(0, cg.IndexOf("x"))) + ox;
-                //oh = Convert.ToInt32(cg.Substring(cg.IndexOf("x") + 1, cg.IndexOf("+") - cg.IndexOf("x") - 1)) + oy;
+                ow = Convert.ToInt32(cg.Substring(0, cg.IndexOf("x"))) - ox;
+                oh = Convert.ToInt32(cg.Substring(cg.IndexOf("x") + 1, cg.IndexOf("+") - cg.IndexOf("x") - 1)) - oy;
                 
                 //restaura s - para a escala
-                //s = (double)w / (double)ow;
-                ox = cam[i].x;
-                oy = cam[i].y;
-                ow = cam[i].w;
-                oh = cam[i].h;
+                s = (double)(ow) / (double)w;
+
+                //ou var stored...
                 s = cam[i].s;
+                x = cam[i].x;
+                y = cam[i].y;
             }
-            s = s - (double)me.Delta / (double)2000; //zoom rato/2000
 
-            x = (int)Math.Round((double)me.X * (double)w / (double)vw); //traduz para a posicao real no video
-            y = (int)Math.Round((double)me.Y * (double)h / (double)vh); //traduz para a posicao real no video
+            if (me.Delta > 0) s = s - sx; else s = s + sx;
 
-            if (s < 0.16 ) { s = 0.16; }
-            if (s > 1) { s = 1;  x = 1; y = 1;}
+            if (s < 0.1 ) { s = 0.1; }
+            if (s > 1) { s = 1;  x = 0; y = 0;}
 
-            ///
-            int mx = (int)(y - (double)w * s / 2); // centra janela no x
-            int my = (int)(y - (double)h * s / 2); // centra janela no y
+            // h e w correspondentes a e<s>cala
+            cam[i].w = (int)(Math.Truncate((double)(s * w)));
+            cam[i].h = (int)(Math.Truncate((double)(s * w) / w * h));
+
+
+            // traduz para a posicao real no video e retira metade da dimencao para centrar
+            x = x + (int)Math.Round((double)me.X * (double)w / (double)vw) + (int)(-x / 2 - (double)w * s / 2);
+            y = y + (int)Math.Round((double)me.Y * (double)h / (double)vh) + (int)(-y / 2 - (double)h * s / 2);
+
+            //corrige (x,y) fora de janela
+            if (x < 0) x = 0;
+            if (y < 0) y = 0;
+            if (x + cam[i].w > w) x = (int)w - cam[i].w;
+            if (y + cam[i].h > h) y = (int)h - cam[i].h;
 
             cam[i].s = s;
             cam[i].x = x;
             cam[i].y = y;
-            cam[i].w = (int)(Math.Truncate((double)(s * w))) + x;
-            cam[i].h = (int)(Math.Truncate((double)(s * w) / w * h)) + y;
-
-            string CropStr = cam[i].w + "x" + cam[i].h + "+" + x + "+" + y;
+           
+            string CropStr = (cam[i].w + x) + "x" + (cam[i].h + y) + "+" + x + "+" + y;
+            Console.WriteLine("w" + w + "x" + h + "  (" + me.X + ", " + me.Y + ") " + "  (" + x + ", " + y + ") ");
             mp.CropGeometry = CropStr;
-            Console.WriteLine("w" + w +"x" + h + "  (" + x + ", " + y + ")  Delta:" + me.Delta + " s=" + (double)s + "   CROP= "+ cg + " " + CropStr);
-
+            //Console.WriteLine("w" + w +"x" + h + "  (" + x + ", " + y + ")  Delta:" + me.Delta + " s=" + (double)s + "   CROP= "+ cg + " " + CropStr);
         }
 
 
-        private void videoView_Click(object sender, EventArgs e) {
+        string MouseDown = null;
+
+        private void videoView_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e) {
+            //if (MouseDown !=  "L") return;
+
+            // Update the mouse event label to indicate the MouseHover event occurred.
+        }
+
+        private void videoView_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e) {
+            Point mouseUpLocation = new System.Drawing.Point(e.X, e.Y);
+            MouseDown=null;
+        }
+
+        private void videoView_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e) {
+            // Update the mouse path with the mouse information
+            Point mouseDownLocation = new Point(e.X, e.Y);
+
+            switch (e.Button) {
+                case MouseButtons.Left:
+                    MouseDown = "L";
+                    break;
+                case MouseButtons.Right:
+                    MouseDown = "R";
+                    break;
+                case MouseButtons.Middle:
+                    MouseDown = "M";
+                    break;
+                case MouseButtons.XButton1:
+                    MouseDown = "X1";
+                    break;
+                case MouseButtons.XButton2:
+                    MouseDown = "X2";
+                    break;
+                case MouseButtons.None:
+                default:
+                    break;
+            }
+        }
+
+        private void videoView_MouseClick(object sender, System.Windows.Forms.MouseEventArgs e) {
             //_mediaPlayer1.SetAudioTrack(1);
             MouseEventArgs me = (MouseEventArgs)e;
             switch (me.Button) {
 
                 case MouseButtons.Left:
                     // Left click
+                    Janela j = (Janela)sender;
+                    string camera = j.Name;
+                    int i = Convert.ToInt32(camera.Substring(camera.IndexOf(" ") + 1));
+                    MediaPlayer mp = cam[i].MediaPlayer;
+                    int vw = cam[i].Width; int vh = cam[i].Height; //tamanho da janela 
+                    double s = cam[i].s;
+                    int x = cam[i].x;
+                    int y = cam[i].y;
+
+                    uint n = 0; uint w = 0; uint h = 0;
+                    mp.Size(n, ref w, ref h); //Tamanho real do video
+
+                    if (me.X > 3 * (vw / 5)) { x = x + (int)vw / 30; }
+                    if (me.X < 2 * (vw / 5)) { x = x - (int)vw / 30; }
+                    if (me.Y > 3 * (vh / 5)) { y = y + (int)vh / 30; }
+                    if (me.Y < 2 * (vw / 5)) { y = y - (int)vh / 30; }
+
+                    //corrige (x,y) fora de janela
+                    if (x < 0) x = 0;
+                    if (y < 0) y = 0;
+                    if (x + cam[i].w > w) x = (int)w - cam[i].w;
+                    if (y + cam[i].h > h) y = (int)h - cam[i].h;
+
+                    cam[i].x = x;
+                    cam[i].y = y;
+
+                    string CropStr = (cam[i].w + x) + "x" + (cam[i].h + y) + "+" + x + "+" + y;
+                    mp.CropGeometry = CropStr;
                     break;
 
                 case MouseButtons.Right:
@@ -174,6 +256,7 @@ namespace IPCams {
                     break;
             }
         }
+
 
         private void ContextMenuStrip_click(object sender, ToolStripItemClickedEventArgs e) {
             ContextMenuStrip cm = (ContextMenuStrip)sender;
@@ -204,7 +287,7 @@ namespace IPCams {
                     if (Tools.Funcs.ShowDialog(ref camRstp, "Edit") == DialogResult.OK) {
                         cam[i].MediaPlayer.Stop();
                         cam[i].MediaPlayer.Dispose();
-                        cam[i].Text = GrokCmd(camRstp);
+                        cam[i].Text = camRstp;
                         cam[i].init(GrokCmd(camRstp));
                         DoGrid(true);
                     }
@@ -212,8 +295,8 @@ namespace IPCams {
                 case "Move Up":
                     if (i > 0) {
                         Janela store = new Janela();
-                        store = cam[i-1];
-                        cam[i-1] = cam[i];
+                        store = cam[i - 1];
+                        cam[i - 1] = cam[i];
                         cam[i] = store;
                         DoGrid(true);
                     }
@@ -228,7 +311,7 @@ namespace IPCams {
                     }
                     break;
                 case "Mute":
-                    if (cam[i].MediaPlayer.Volume==0) {
+                    if (cam[i].MediaPlayer.Volume == 0) {
                         cam[i].MediaPlayer.Volume = 100;
                     }
                     else {
@@ -238,8 +321,23 @@ namespace IPCams {
             }
         }
 
+        void AddCam(int i) {
+            string camRstp = "rstp://user:pass@ipORnameOR[mac]:554/stream";
+            if (Tools.Funcs.ShowDialog(ref camRstp, "Add Camera") == DialogResult.OK) {
+                if (String.IsNullOrEmpty( camRstp ) && i == -1) System.Environment.Exit(0);
+                else {
+                    Loadipcams.Add(camRstp);                    
+                }
+            }
+            else if (i == -1) System.Environment.Exit(0);
+        }
+
         private void Form1_Resize(object sender, EventArgs e) {
             DoGrid();
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e) {
+            Funcs.SaveCfg(cam);
         }
     }
 }

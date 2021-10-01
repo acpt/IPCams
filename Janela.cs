@@ -25,15 +25,22 @@ namespace IPCams {
             _libvlc = new LibVLC();
 
             _mediaPlayer = new MediaPlayer(_libvlc);
-            _mediaPlayer.EnableHardwareDecoding = true;
+            _mediaPlayer.EnableHardwareDecoding = false;
+            //_mediaPlayer.EnableHardwareDecoding = true;  //problems
             _mediaPlayer.AspectRatio = "16:9";
             _mediaPlayer.EnableMouseInput = false;
             _mediaPlayer.EnableKeyInput = false;
 
             this.MediaPlayer = _mediaPlayer;
-            this.MediaPlayer.Play(new Media(_libvlc, new Uri(URL)));
+            try {
+                this.MediaPlayer.Play(new Media(_libvlc, new Uri(URL)));
+            }
+            catch (InvalidCastException e) {
+
+            }
             MediaPlayer.Scale = 0; //no zoom ?
             MediaPlayer.Volume = 0; // muted by default
+            s=1;
             //MediaPlayer.UpdateViewpoint();
         }
     }

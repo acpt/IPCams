@@ -6,6 +6,8 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
 using System.Windows.Forms;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Tools {
 
@@ -86,10 +88,28 @@ namespace Tools {
             input = textBox.Text;
             return result;    
         }
+
+        public static void LoadCfg(ref List<string> loadCams) {
+            try {
+                loadCams = new List<string>(File.ReadAllLines("IPCams.cfg"));
+            }
+            catch (Exception e) { }
+             
+        }
+
+        public static void SaveCfg(List<IPCams.Janela> cam) {
+            if (cam.Count != 0) {
+                List<string> lines=new List<string>();
+                for (int i = 0; i < cam.Count; i++) {
+                    lines.Add(cam[i].Text);
+                }
+                File.WriteAllLines("IPCams.cfg",lines);
+            }
+        }
     }
 
     public class IPFuncs {
-                //[DllImport("user32.dll", SetLastError = true)]
+        //[DllImport("user32.dll", SetLastError = true)]
         //static extern int MessageBoxTimeout(IntPtr hwnd, String text, String title, uint type, Int16 wLanguageId, Int32 milliseconds);
         
         public static void Ping255(string localIP) {
@@ -115,6 +135,7 @@ namespace Tools {
             throw new NotImplementedException();
         }
     }
+
     static class  ARP {
         // The max number of physical addresses.
         const int MAXLEN_PHYSADDR = 8;
