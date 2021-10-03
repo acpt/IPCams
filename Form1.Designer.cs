@@ -157,23 +157,24 @@ namespace IPCams {
             //cria janelas carregadas, tamanho e local 
 
             //calcula com 16*9 divisao do rectangulo actual
-            double h = this.Width / (this.Height * (16F / 9F));
-            double v = this.Height / (this.Width * (9F / 16F));
+            //double h = this.Width / (this.Height * (16F / 9F));
+            //double v = this.Height / (this.Width * (9F / 16F));
+            int dv = (int)(this.Width * (9f / 16f) / this.Height);
+            int dh = (int)(this.Height * (16f / 9f) / this.Width);
 
-            Console.WriteLine("h:" + h.ToString("n2")+ " v:" + v.ToString("n2"));
-            int c = (int)(Math.Sqrt(cam.Count) + .999); int r = (int)(Math.Sqrt(cam.Count) + .999);
-            if (h > v + 1) { 
-                c = (int)(Math.Sqrt(cam.Count) + .999) + (int)Math.Truncate(h - v);
-                r = (int)(Math.Truncate(cam.Count / c +.999));
-                if (r==0) r = 1;
+            
+            int c = (int)(Math.Sqrt(cam.Count) + .999); 
+            int r = (int)((double)cam.Count / c + .999);
+
+            if (dh > 1) {
+                //balanca pelas diferencas 
+                c = (int)(Math.Sqrt((double)cam.Count / dh) + .999);
+                r = (int)((double)cam.Count / c + .999);
             }
-            if (v > h + 1) {
-                r = (int)(Math.Sqrt(cam.Count) + .999) + (int)Math.Truncate(v - h);
-                if (r > cam.Count) { r = cam.Count;}                
-                c = (int)(Math.Truncate(cam.Count / r + .999));
-                if (c == 0) c = 1;
+            if (dv > 1) {
+                r = (int)(Math.Sqrt((double)cam.Count / dv) + .999);
+                c = (int)((double)cam.Count / r + .999);
             }
-            if (c * r - cam.Count >= c) { r = r - 1; }
 
             Console.WriteLine ("DoGrid " + r +","+ c);
 
@@ -227,13 +228,13 @@ namespace IPCams {
 
             for (int i = 0; i< Loadipcams.Count; i++) {                
                 cam.Add(new Janela());
-                JanelaDefaults(cam[i], GrokCmd(Loadipcams[i]));
+                JanelaDefaults(cam[i], Loadipcams[i]);
             }
 
-            for (int i = 0; i< Loadipcams.Count; i++) {
-                cam[i].init(GrokCmd(Loadipcams[i]));
-            }
-    
+            //for (int i = 0; i< Loadipcams.Count; i++) {
+            //    cam[i].Text = Loadipcams[i];
+            //    //cam[i].init(GrokCmd(Loadipcams[i]));
+            //}
         }
 
         public void JanelaDefaults(Janela j, string url) {
@@ -248,8 +249,9 @@ namespace IPCams {
             j.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.videoView_MouseWheel);
             j.MouseClick += new System.Windows.Forms.MouseEventHandler(this.videoView_MouseClick);
             j.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.videoView_MouseClick);
-            //j.MouseUp += new System.Windows.Forms.MouseEventHandler(this.videoView_MouseUp);
-            //j.MouseMove += new System.Windows.Forms.MouseEventHandler(this.videoView_MouseMove);
+            j.MouseDown += new System.Windows.Forms.MouseEventHandler(this.videoView_MouseDown);
+            j.MouseUp += new System.Windows.Forms.MouseEventHandler(this.videoView_MouseUp);
+            j.MouseMove += new System.Windows.Forms.MouseEventHandler(this.videoView_MouseMove);
 
             j.ContextMenuStrip = contextMenuStrip1;
             j.Text = url;

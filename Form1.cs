@@ -155,8 +155,8 @@ namespace IPCams {
 
 
             // traduz para a posicao real no video e retira metade da dimencao para centrar
-            x = x + (int)Math.Round((double)me.X * (double)w / (double)vw) + (int)(-x / 2 - (double)w * s / 2);
-            y = y + (int)Math.Round((double)me.Y * (double)h / (double)vh) + (int)(-y / 2 - (double)h * s / 2);
+            x = x + (int)Math.Round((double)me.X * w / vw - (int)((double)w * s / 2));
+            y = y + (int)Math.Round((double)me.Y * w / vw - (int)((double)h * s / 2));
 
             //corrige (x,y) fora de janela
             if (x < 0) x = 0;
@@ -176,25 +176,50 @@ namespace IPCams {
 
 
         string MouseDown = null;
+        Point startPos;
+        Point currentPos;
+        int startJan=-1;
+
 
         private void videoView_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e) {
-            //if (MouseDown !=  "L") return;
+            if (MouseDown == "L") {
+                int i = startJan;
+                MediaPlayer mp = cam[i].MediaPlayer;
+                uint n = 0; uint w = 0; uint h = 0;
+                mp.Size(n, ref w, ref h); //Tamanho real do video
+                int vw = cam[i].Width; int vh = cam[i].Height; //tamanho da janela 
+                //double s = cam[i].s;
+                int x = cam[i].x;
+                int y = cam[i].y;
 
-            // Update the mouse event label to indicate the MouseHover event occurred.
+                x = x + (int)((currentPos.X - startPos.X) * w / vw);  //move delta
+                y = y + (int)((currentPos.Y - startPos.Y) * h / vh);
+
+                //corrige (x,y) fora de janela
+                if (x < 0) x = 0;
+                if (y < 0) y = 0;
+                if (x + cam[i].w > w) x = (int)w - cam[i].w;
+                if (y + cam[i].h > h) y = (int)h - cam[i].h;
+
+                //crop
+                string CropStr = (cam[i].w + x) + "x" + (cam[i].h + y) + "+" + x + "+" + y;
+                mp.CropGeometry = CropStr;
+            }
         }
-
         private void videoView_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e) {
-            Point mouseUpLocation = new System.Drawing.Point(e.X, e.Y);
             MouseDown=null;
         }
 
         private void videoView_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e) {
-            // Update the mouse path with the mouse information
-            Point mouseDownLocation = new Point(e.X, e.Y);
+            currentPos = e.Location;
 
             switch (e.Button) {
                 case MouseButtons.Left:
                     MouseDown = "L";
+                    Janela j = (Janela)sender;
+                    string camera = j.Name;
+                    int i = Convert.ToInt32(camera.Substring(camera.IndexOf(" ") + 1));
+                    startJan = i;
                     break;
                 case MouseButtons.Right:
                     MouseDown = "R";
@@ -221,34 +246,38 @@ namespace IPCams {
 
                 case MouseButtons.Left:
                     // Left click
+                    startPos = me.Location;
+
                     Janela j = (Janela)sender;
                     string camera = j.Name;
                     int i = Convert.ToInt32(camera.Substring(camera.IndexOf(" ") + 1));
-                    MediaPlayer mp = cam[i].MediaPlayer;
-                    int vw = cam[i].Width; int vh = cam[i].Height; //tamanho da janela 
-                    double s = cam[i].s;
-                    int x = cam[i].x;
-                    int y = cam[i].y;
+                    startJan = i;
 
-                    uint n = 0; uint w = 0; uint h = 0;
-                    mp.Size(n, ref w, ref h); //Tamanho real do video
+                    //MediaPlayer mp = cam[i].MediaPlayer;
+                    //int vw = cam[i].Width; int vh = cam[i].Height; //tamanho da janela 
+                    //double s = cam[i].s;
+                    //int x = cam[i].x;
+                    //int y = cam[i].y;
 
-                    if (me.X > 3 * (vw / 5)) { x = x + (int)vw / 30; }
-                    if (me.X < 2 * (vw / 5)) { x = x - (int)vw / 30; }
-                    if (me.Y > 3 * (vh / 5)) { y = y + (int)vh / 30; }
-                    if (me.Y < 2 * (vw / 5)) { y = y - (int)vh / 30; }
+                    //uint n = 0; uint w = 0; uint h = 0;
+                    //mp.Size(n, ref w, ref h); //Tamanho real do video
 
-                    //corrige (x,y) fora de janela
-                    if (x < 0) x = 0;
-                    if (y < 0) y = 0;
-                    if (x + cam[i].w > w) x = (int)w - cam[i].w;
-                    if (y + cam[i].h > h) y = (int)h - cam[i].h;
+                    //if (me.X > (vw / 2)) { x = x + (int)vw / 30; }
+                    //if (me.X < (vw / 2)) { x = x - (int)vw / 30; }
+                    //if (me.Y > (vh / 2)) { y = y + (int)vh / 30; }
+                    //if (me.Y < (vw / 2)) { y = y - (int)vh / 30; }
 
-                    cam[i].x = x;
-                    cam[i].y = y;
+                    ////corrige (x,y) fora de janela
+                    //if (x < 0) x = 0;
+                    //if (y < 0) y = 0;
+                    //if (x + cam[i].w > w) x = (int)w - cam[i].w;
+                    //if (y + cam[i].h > h) y = (int)h - cam[i].h;
 
-                    string CropStr = (cam[i].w + x) + "x" + (cam[i].h + y) + "+" + x + "+" + y;
-                    mp.CropGeometry = CropStr;
+                    //cam[i].x = x;
+                    //cam[i].y = y;
+
+                    //string CropStr = (cam[i].w + x) + "x" + (cam[i].h + y) + "+" + x + "+" + y;
+                    //mp.CropGeometry = CropStr;
                     break;
 
                 case MouseButtons.Right:
