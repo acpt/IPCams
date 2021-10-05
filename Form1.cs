@@ -27,17 +27,8 @@ namespace IPCams {
 
         //from args or param file... or added and saved
         List<string> Loadipcams = new List<string>(); // { 
-            //"rtsp://nvrviewer:armgames@[c0-c9-e3-dd-0c-00]:554/stream1",
-            //"rtsp://nvrviewer:armgames@[28-ee-52-93-33-e0]:554/stream1",
-            //"rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=1&subtype=1",
-            //"rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=2&subtype=1",
-            ////"rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=3&subtype=1",
-            ////"rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=4&subtype=1",
-            ////"rtsp://acpt:armdom@aca1.dyndns.info:554/cam/realmonitor?channel=5&subtype=1",
-            ////"rtsp://armando:Arm2018%@aced.dyndns.info:554/cam/realmonitor?channel=1&subtype=1",
-            ////"rtsp://armando:Arm2018%@aced.dyndns.info:554/cam/realmonitor?channel=2&subtype=1",
-            //"rtsp://armando:Arm2018%@aced.dyndns.info:554/cam/realmonitor?channel=3&subtype=1",
-            //"rtsp://armando:Arm2018%@aced.dyndns.info:554/cam/realmonitor?channel=4&subtype=1"
+            //"rtsp://user:pass@[c0-c9-e3-dd-0c-00]:554/stream1",
+            //"rtsp://user:pass@dns.com:554/cam/realmonitor?channel=1&subtype=1",
         //};
         
         public Form1() {
