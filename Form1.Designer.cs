@@ -161,7 +161,7 @@ namespace IPCams {
             //calcula com 16*9 divisao do rectangulo actual
             //double h = this.Width / (this.Height * (16F / 9F));
             //double v = this.Height / (this.Width * (9F / 16F));
-            int dv = (int)(this.Width * (9f / 19f) / this.Height);
+            int dv = (int)(this.Width / this.Height);
             int dh = (int)(this.Height * (16f / 9f) / this.Width);
 
             
