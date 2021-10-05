@@ -3,7 +3,10 @@ Simple IP Camera viewer
 
 C# Forms project using LIBVLCSharp
 
-View multiple vlc players rstp cameras with zoom capability
+View multiple camera transmitions suported by VideoLan vlc (rstp,http...) with simple zoom capability
+
 Rezising will readapt to all cameras
+
 Auto Load and Save configuration 
 
+No code cleaning done
