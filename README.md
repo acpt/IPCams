@@ -1,5 +1,9 @@
 # IPCams
 Simple IP Camera viewer
-c# using LIBVLCSharp
+
+C# Forms project using LIBVLCSharp
 
 View multiple vlc players rstp cameras with zoom capability
+Rezising will readapt to all cameras
+Auto Load and Save configuration 
+
