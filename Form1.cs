@@ -110,7 +110,6 @@ namespace IPCams {
         }
 
         private void videoView_MouseWheel(object sender, EventArgs e) {
-            double s = 1;
             double sx = 0.025;
 
             Janela j = (Janela)sender;
@@ -123,7 +122,7 @@ namespace IPCams {
             int vw=cam[i].Width; int vh=cam[i].Height; //tamanho da janela 
 
             int ox,oy,ow,oh;
-            int x = 0; int y = 0;
+            int x = 0; int y = 0; double s = 1;
 
             string cg = mp.CropGeometry;
             
@@ -144,19 +143,29 @@ namespace IPCams {
                 y = cam[i].y;
             }
 
+            // calcula margem negra
+            int Vvw = vw; int Vvh = vh; int vx = 0; int vy = 0;
+            if (vw * (9f / 16f) / vh > 1) {
+                Vvw = (int)(vh * (16f / 9f));
+                vx = (vw - Vvw) / 2;
+            }
+            else {
+                Vvh = (int)(vw * (9f / 16f)); ;
+                vy = (vh - Vvh) / 2;
+            }
+
             if (me.Delta > 0) s = s - sx; else s = s + sx;
 
             if (s < 0.1 ) { s = 0.1; }
             if (s > 1) { s = 1;  x = 0; y = 0;}
 
             // h e w correspondentes a e<s>cala
-            cam[i].w = (int)(Math.Truncate((double)(s * w)));
-            cam[i].h = (int)(Math.Truncate((double)(s * w) / w * h));
-
+            cam[i].w = (int)(w * s);
+            cam[i].h = (int)(h * s);
 
             // traduz para a posicao real no video e retira metade da dimencao para centrar
-            x = x + (int)Math.Round((double)me.X * w / vw - (int)((double)w * s / 2));
-            y = y + (int)Math.Round((double)me.Y * w / vw - (int)((double)h * s / 2));
+            x = x + (int)(Math.Round((double)(me.X - vx) - (int)((double)Vvw / 2)) * s);
+            y = y + (int)(Math.Round((double)(me.Y - vy) - (int)((double)Vvh / 2)) * s);
 
             //corrige (x,y) fora de janela
             if (x < 0) x = 0;
@@ -180,112 +189,136 @@ namespace IPCams {
         Point currentPos;
         int startJan=-1;
 
-
         private void videoView_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e) {
-            if (MouseDown == "L") {
-                int i = startJan;
-                MediaPlayer mp = cam[i].MediaPlayer;
-                uint n = 0; uint w = 0; uint h = 0;
-                mp.Size(n, ref w, ref h); //Tamanho real do video
-                int vw = cam[i].Width; int vh = cam[i].Height; //tamanho da janela 
-                //double s = cam[i].s;
-                int x = cam[i].x;
-                int y = cam[i].y;
+            //if (MouseDown == "L") {
+            //    int i = startJan;
+            //    MediaPlayer mp = cam[i].MediaPlayer;
+            //    uint n = 0; uint w = 0; uint h = 0;
+            //    mp.Size(n, ref w, ref h); //Tamanho real do video
+            //    int vw = cam[i].Width; int vh = cam[i].Height; //tamanho da janela 
+            //    //double s = cam[i].s;
+            //    int x = cam[i].x;
+            //    int y = cam[i].y;
 
-                x = x + (int)((currentPos.X - startPos.X) * w / vw);  //move delta
-                y = y + (int)((currentPos.Y - startPos.Y) * h / vh);
+            //    x = x + (int)((currentPos.X - startPos.X) * w / vw);  //move delta
+            //    y = y + (int)((currentPos.Y - startPos.Y) * h / vh);
 
-                //corrige (x,y) fora de janela
-                if (x < 0) x = 0;
-                if (y < 0) y = 0;
-                if (x + cam[i].w > w) x = (int)w - cam[i].w;
-                if (y + cam[i].h > h) y = (int)h - cam[i].h;
+            //    //corrige (x,y) fora de janela
+            //    if (x < 0) x = 0;
+            //    if (y < 0) y = 0;
+            //    if (x + cam[i].w > w) x = (int)w - cam[i].w;
+            //    if (y + cam[i].h > h) y = (int)h - cam[i].h;
 
-                //crop
-                string CropStr = (cam[i].w + x) + "x" + (cam[i].h + y) + "+" + x + "+" + y;
-                mp.CropGeometry = CropStr;
-            }
+            //    //crop
+            //    string CropStr = (cam[i].w + x) + "x" + (cam[i].h + y) + "+" + x + "+" + y;
+            //    mp.CropGeometry = CropStr;
+            //}
         }
         private void videoView_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e) {
             MouseDown=null;
         }
-
         private void videoView_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e) {
-            currentPos = e.Location;
+            //currentPos = e.Location;
 
-            switch (e.Button) {
-                case MouseButtons.Left:
-                    MouseDown = "L";
-                    Janela j = (Janela)sender;
-                    string camera = j.Name;
-                    int i = Convert.ToInt32(camera.Substring(camera.IndexOf(" ") + 1));
-                    startJan = i;
-                    break;
-                case MouseButtons.Right:
-                    MouseDown = "R";
-                    break;
-                case MouseButtons.Middle:
-                    MouseDown = "M";
-                    break;
-                case MouseButtons.XButton1:
-                    MouseDown = "X1";
-                    break;
-                case MouseButtons.XButton2:
-                    MouseDown = "X2";
-                    break;
-                case MouseButtons.None:
-                default:
-                    break;
-            }
+            //switch (e.Button) {
+            //    case MouseButtons.Left:
+            //        MouseDown = "L";
+            //        Janela j = (Janela)sender;
+            //        string camera = j.Name;
+            //        int i = Convert.ToInt32(camera.Substring(camera.IndexOf(" ") + 1));
+            //        startJan = i;
+            //        break;
+            //    case MouseButtons.Right:
+            //        MouseDown = "R";
+            //        break;
+            //    case MouseButtons.Middle:
+            //        MouseDown = "M";
+            //        break;
+            //    case MouseButtons.XButton1:
+            //        MouseDown = "X1";
+            //        break;
+            //    case MouseButtons.XButton2:
+            //        MouseDown = "X2";
+            //        break;
+            //    case MouseButtons.None:
+            //    default:
+            //        break;
+            //}
         }
 
         private void videoView_MouseClick(object sender, System.Windows.Forms.MouseEventArgs e) {
             //_mediaPlayer1.SetAudioTrack(1);
             MouseEventArgs me = (MouseEventArgs)e;
+
+            Janela j = (Janela)sender;
+            string camera = j.Name;
+            int i = Convert.ToInt32(camera.Substring(camera.IndexOf(" ") + 1));
+            startJan = i;
+            MediaPlayer mp = cam[i].MediaPlayer;
+
             switch (me.Button) {
 
                 case MouseButtons.Left:
                     // Left click
-                    startPos = me.Location;
 
-                    Janela j = (Janela)sender;
-                    string camera = j.Name;
-                    int i = Convert.ToInt32(camera.Substring(camera.IndexOf(" ") + 1));
-                    startJan = i;
+                    uint n = 0; uint w = 0; uint h = 0;
+                    mp.Size(n, ref w, ref h); //Tamanho real do video
+                    // descobre a barra preta H ou V
+                    int vw = cam[i].Width; int vh = cam[i].Height; //tamanho da janela 
 
-                    //MediaPlayer mp = cam[i].MediaPlayer;
-                    //int vw = cam[i].Width; int vh = cam[i].Height; //tamanho da janela 
-                    //double s = cam[i].s;
-                    //int x = cam[i].x;
-                    //int y = cam[i].y;
+                    // calcula margem negra
+                    int Vvw=vw; int Vvh= vh; int vx=0; int vy=0;
+                    if (vw * (9f / 16f) / vh > 1 ) {
+                        Vvw = (int)(vh * (16f / 9f));
+                        vx = (vw-Vvw) / 2 - 1;
+                        //Console.WriteLine("Desvio horizontal  " + f(Vvw) + " :  subtrair vx " + vx);
+                    }
+                    else {
+                        Vvh = (int)(vw * (9f / 16f)); ;
+                        vy = (vh - Vvh) / 2 - 1;
+                        //Console.WriteLine("Devio vertical  " + f(Vvh) + " : subtrair  vy " + vy);
+                    }
 
-                    //uint n = 0; uint w = 0; uint h = 0;
-                    //mp.Size(n, ref w, ref h); //Tamanho real do video
+                    int x = 0; int y = 0; double s = 1;
 
-                    //if (me.X > (vw / 2)) { x = x + (int)vw / 30; }
-                    //if (me.X < (vw / 2)) { x = x - (int)vw / 30; }
-                    //if (me.Y > (vh / 2)) { y = y + (int)vh / 30; }
-                    //if (me.Y < (vw / 2)) { y = y - (int)vh / 30; }
+                    s = cam[i].s;
+                    x = cam[i].x;
+                    y = cam[i].y;
 
-                    ////corrige (x,y) fora de janela
-                    //if (x < 0) x = 0;
-                    //if (y < 0) y = 0;
-                    //if (x + cam[i].w > w) x = (int)w - cam[i].w;
-                    //if (y + cam[i].h > h) y = (int)h - cam[i].h;
+                    Console.WriteLine("Pos. Entrada  (" + f(x) + ", " + f(y) + ")  Rato:" + me.X + "," + me.Y);
+                    Console.WriteLine("da janela total      " + f(vw) +  " :" + f(vh) +  " ");
 
-                    //cam[i].x = x;
-                    //cam[i].y = y;
+                    // traduz para a posicao real no video e retira metade da dimencao para centrar
+                    x = x + (int)(Math.Round((double)(me.X-vx) - (int)((double)Vvw / 2)) * s);
+                    y = y + (int)(Math.Round((double)(me.Y-vy) - (int)((double)Vvh / 2)) * s);
 
-                    //string CropStr = (cam[i].w + x) + "x" + (cam[i].h + y) + "+" + x + "+" + y;
-                    //mp.CropGeometry = CropStr;
+                    //corrige (x,y) fora de janela
+                    if (x < 0) x = 0;
+                    if (y < 0) y = 0;
+                    if (x + cam[i].w > w) x = (int)w - cam[i].w;
+                    if (y + cam[i].h > h) y = (int)h - cam[i].h;
+
+                    cam[i].x = x;
+                    cam[i].y = y;
+
+                    //Console.WriteLine("rw:" + w + " rh:" + h + "  Saida Rato :" + x + "," + y);
+                    //Console.WriteLine("");
+
+                    string CropStr = (cam[i].w + x) + "x" + (cam[i].h + y) + "+" + x + "+" + y;
+                    mp.CropGeometry = CropStr;
                     break;
 
                 case MouseButtons.Right:
-                    // Right click
+                    break;
+                case MouseButtons.Middle:
+                    mp.Stop();
                     break;
             }
         }
 
+        string f(double n) {
+            return String.Format("{0,3}", n);
+        }
 
         private void ContextMenuStrip_click(object sender, ToolStripItemClickedEventArgs e) {
             ContextMenuStrip cm = (ContextMenuStrip)sender;

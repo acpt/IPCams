@@ -37,6 +37,7 @@ namespace IPCams {
         /// </summary>
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.addCamToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -128,6 +129,7 @@ namespace IPCams {
             this.BackColor = System.Drawing.SystemColors.GrayText;
             this.ClientSize = new System.Drawing.Size(782, 404);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
             this.Text = "AC Viewer";
@@ -159,11 +161,11 @@ namespace IPCams {
             //calcula com 16*9 divisao do rectangulo actual
             //double h = this.Width / (this.Height * (16F / 9F));
             //double v = this.Height / (this.Width * (9F / 16F));
-            int dv = (int)(this.Width * (9f / 16f) / this.Height);
+            int dv = (int)(this.Width * (9f / 19f) / this.Height);
             int dh = (int)(this.Height * (16f / 9f) / this.Width);
 
             
-            int c = (int)(Math.Sqrt(cam.Count) + .999); 
+            int c = (int)(Math.Sqrt(cam.Count) + .999);      
             int r = (int)((double)cam.Count / c + .999);
 
             if (dh > 1) {
@@ -171,12 +173,13 @@ namespace IPCams {
                 c = (int)(Math.Sqrt((double)cam.Count / dh) + .999);
                 r = (int)((double)cam.Count / c + .999);
             }
-            if (dv > 1) {
-                r = (int)(Math.Sqrt((double)cam.Count / dv) + .999);
-                c = (int)((double)cam.Count / r + .999);
+            else
+                if (dv > 1) {
+                    r = (int)(Math.Sqrt((double)cam.Count / dv) + .999);
+                    c = (int)((double)cam.Count / r + .999);
             }
 
-            Console.WriteLine ("DoGrid " + r +","+ c);
+            //Console.WriteLine ("DoGrid " + r +","+ c);
 
             if ((current_r != r && current_c != c) || force ){
                 tableLayoutPanel1.Controls.Clear();
@@ -230,11 +233,6 @@ namespace IPCams {
                 cam.Add(new Janela());
                 JanelaDefaults(cam[i], Loadipcams[i]);
             }
-
-            //for (int i = 0; i< Loadipcams.Count; i++) {
-            //    cam[i].Text = Loadipcams[i];
-            //    //cam[i].init(GrokCmd(Loadipcams[i]));
-            //}
         }
 
         public void JanelaDefaults(Janela j, string url) {
