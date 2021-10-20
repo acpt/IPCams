@@ -22,7 +22,7 @@ namespace IPCams {
         //ibVLC _libvlc;
         //MediaPlayer _mediaPlayer1;
         //MediaPlayer _mediaPlayer2;
-        List<Janela> cam = new List<Janela>();
+        static List<Janela> cam = new List<Janela>();
         //Panel[] panel = null;
 
         //from args or param file... or added and saved
@@ -30,6 +30,7 @@ namespace IPCams {
             //"rtsp://user:pass@[c0-c9-e3-dd-0c-00]:554/stream1",
             //"rtsp://user:pass@dns.com:554/cam/realmonitor?channel=1&subtype=1",
         //};
+        static System.Windows.Forms.Timer checkTimer = new System.Windows.Forms.Timer();
         
         public Form1() {
             InitializeComponent();
@@ -40,7 +41,9 @@ namespace IPCams {
 
             LoadCams(); 
             DoGrid();
-
+            checkTimer.Tick += new EventHandler(VerificaCams);
+            checkTimer.Interval = 5000;
+            checkTimer.Start();             
         }
 
         public string GrokCmd(string cmd) {
@@ -385,6 +388,16 @@ namespace IPCams {
             else if (i == -1) System.Environment.Exit(0);
         }
 
+        private static void VerificaCams(Object myObject, EventArgs myEventArgs) {
+            for(int i=0; i<cam.Count; i++) {
+                if (cam[i].MediaPlayer.IsPlaying == false) {
+                    Console.WriteLine("Player [" + i + "]  Parou - forca play");
+                    cam[i].MediaPlayer.Play();
+                } 
+            }
+
+        }
+
         private void Form1_Resize(object sender, EventArgs e) {
             DoGrid();
         }
@@ -392,5 +405,6 @@ namespace IPCams {
         private void Form1_FormClosed(object sender, FormClosedEventArgs e) {
             Funcs.SaveCfg(cam);
         }
+
     }
 }
