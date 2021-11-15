@@ -28,6 +28,7 @@ namespace IPCams {
         //from args or param file... or added and saved
         List<string> Loadipcams = new List<string>(); // { 
             //"rtsp://user:pass@[c0-c9-e3-dd-0c-00]:554/stream1",
+            //"rtsp://user:pass@[28-ee-52-93-33-e0]:554/stream1",
             //"rtsp://user:pass@dns.com:554/cam/realmonitor?channel=1&subtype=1",
         //};
         static System.Windows.Forms.Timer checkTimer = new System.Windows.Forms.Timer();
@@ -41,9 +42,9 @@ namespace IPCams {
 
             LoadCams(); 
             DoGrid();
-            checkTimer.Tick += new EventHandler(VerificaCams);
-            checkTimer.Interval = 5000;
-            checkTimer.Start();             
+            //checkTimer.Tick += new EventHandler(VerificaCams);
+            //checkTimer.Interval = 5000;
+            //checkTimer.Start();             
         }
 
         public string GrokCmd(string cmd) {
@@ -339,13 +340,14 @@ namespace IPCams {
 
                     break;
                 case "Edit Cam":
-                    camRstp = cam[i].URL;
+                    camRstp = cam[i].Text;
                     if (Tools.Funcs.ShowDialog(ref camRstp, "Edit") == DialogResult.OK) {
                         cam[i].MediaPlayer.Stop();
                         cam[i].MediaPlayer.Dispose();
                         cam[i].Text = camRstp;
-                        cam[i].init(GrokCmd(camRstp));
+                        //cam[i].init(GrokCmd(camRstp));
                         DoGrid(true);
+                        Tools.Funcs.SaveCfg(cam);
                     }
                     break;
                 case "Move Up":
@@ -366,13 +368,17 @@ namespace IPCams {
                         DoGrid(true);
                     }
                     break;
-                case "Mute":
+                case "Mute/UnMute":
                     if (cam[i].MediaPlayer.Volume == 0) {
                         cam[i].MediaPlayer.Volume = 100;
                     }
                     else {
                         cam[i].MediaPlayer.Volume = 0;
                     }
+                    break;
+                case "Restart":
+                    cam[i].MediaPlayer.Stop();
+                    cam[i].MediaPlayer.Play();
                     break;
             }
         }
@@ -392,6 +398,7 @@ namespace IPCams {
             for(int i=0; i<cam.Count; i++) {
                 if (cam[i].MediaPlayer.IsPlaying == false) {
                     Console.WriteLine("Player [" + i + "]  Parou - forca play");
+                    cam[i].MediaPlayer.Stop();
                     cam[i].MediaPlayer.Play();
                 } 
             }
