@@ -13,6 +13,7 @@ using System.Threading;
 
 using System.Windows.Automation;
 using System.Diagnostics;
+using Tools;
 
 namespace IPCams {
     public partial class Form1 : Form {
@@ -42,12 +43,14 @@ namespace IPCams {
 
             LoadCams(); 
             DoGrid();
+
             //checkTimer.Tick += new EventHandler(VerificaCams);
-            //checkTimer.Interval = 5000;
-            //checkTimer.Start();             
+            //checkTimer.Interval = 30000;
+            //checkTimer.Start();
+
         }
 
-        public string GrokCmd(string cmd) {
+    public static string GrokCmd(string cmd) {
             string ip = cmd;
   
             int i = cmd.IndexOf("[");
@@ -318,7 +321,7 @@ namespace IPCams {
         private void ContextMenuStrip_click(object sender, ToolStripItemClickedEventArgs e) {
             ContextMenuStrip cm = (ContextMenuStrip)sender;
             string camera = cm.SourceControl.Name;
-            int i = Convert.ToInt32( camera.Substring(camera.IndexOf(" ")+1));
+            int i = Convert.ToInt32(camera.Substring(camera.IndexOf(" ")+1));
 
             string camRstp = "";
             switch (e.ClickedItem.Text) {
@@ -342,11 +345,13 @@ namespace IPCams {
                 case "Edit Cam":
                     camRstp = cam[i].Text;
                     if (Tools.Funcs.ShowDialog(ref camRstp, "Edit") == DialogResult.OK) {
-                        cam[i].MediaPlayer.Stop();
+                        //cam[i].MediaPlayer.Stop();
                         cam[i].MediaPlayer.Dispose();
+                        cam[i].MediaPlayer = null;
+
                         cam[i].Text = camRstp;
-                        //cam[i].init(GrokCmd(camRstp));
-                        DoGrid(true);
+                        cam[i].init(GrokCmd(camRstp));
+                        //DoGrid(true);
                         Tools.Funcs.SaveCfg(cam);
                     }
                     break;
@@ -377,7 +382,13 @@ namespace IPCams {
                     }
                     break;
                 case "Restart":
-                    cam[i].MediaPlayer.Stop();
+                    //cam[i].MediaPlayer.Stop();
+                    cam[i].MediaPlayer.Dispose();
+                    cam[i].MediaPlayer = null;
+                    cam[i].init(GrokCmd(cam[i].Text));
+                    //DoGrid(true);
+
+
                     cam[i].MediaPlayer.Play();
                     break;
             }
@@ -396,11 +407,29 @@ namespace IPCams {
 
         private static void VerificaCams(Object myObject, EventArgs myEventArgs) {
             for(int i=0; i<cam.Count; i++) {
-                if (cam[i].MediaPlayer.IsPlaying == false) {
+                MediaPlayer mp = cam[i].MediaPlayer;
+
+                uint n = 0; uint w = 0; uint h = 0;
+                mp.Size(n, ref w, ref h); //Tamanho real do video  PING
+                //if (cam[i].MediaPlayer.IsPlaying == false) {
+                if (w==0 && h == 0) { 
                     Console.WriteLine("Player [" + i + "]  Parou - forca play");
-                    cam[i].MediaPlayer.Stop();
-                    cam[i].MediaPlayer.Play();
+                    cam[i].MediaPlayer.Dispose();
+                    cam[i].MediaPlayer = null;
+                    cam[i].init(GrokCmd(cam[i].Text));
                 } 
+                mp.Dispose();
+            }
+
+        }
+
+        private void MP_Error(object sender, EventArgs e, int i) {
+            Console.Write("Evento MP ");
+            if (cam.Count-1>i) {
+                MediaPlayer mp = cam[i].MediaPlayer;
+
+                if (mp.IsPlaying ==  true) { 
+                }
             }
 
         }

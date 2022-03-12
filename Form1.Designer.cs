@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+//using System.Collections.Generic;
+//using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+//using System.Linq;
+//using System.Text;
+//using System.Threading.Tasks;
 using System.Windows.Forms;
 using LibVLCSharp.Shared;
-using Tools;
-using System.Threading;
+//using Tools;
+//using System.Threading;
 
 namespace IPCams {
     partial class Form1 {
@@ -220,9 +220,17 @@ namespace IPCams {
                 //fill cams
                 int wc = 0; int wr = 0;
                 for (int i = 0; i < cam.Count; i++) {
+                    if (force) {
+                        if (cam[i].MediaPlayer != null) {
+                            cam[i].MediaPlayer.Dispose();
+                            cam[i].MediaPlayer = null;
+                        }
+                    }
                     cam[i].Name = "videoView " + i; //name here case of moves - number is used to get position
                     if (cam[i].MediaPlayer == null ) {
                         cam[i].init(GrokCmd(cam[i].Text));
+                        //cam[i].MediaPlayer.Title = i;
+                        //cam[i].MediaPlayer.EncounteredError += delegate(object sender, EventArgs e) { MP_Error(sender, e, i); };
                     }
                     tableLayoutPanel1.Controls.Add(cam[i], wc, wr);
                     wc++;

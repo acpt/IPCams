@@ -15,8 +15,8 @@ namespace IPCams {
         public int h = 0;
         public double s=1;
 
-        LibVLC _libvlc;
-        MediaPlayer _mediaPlayer;
+        public LibVLC _libvlc;
+        public MediaPlayer _mediaPlayer;
 
 
         public void init(string url) {
