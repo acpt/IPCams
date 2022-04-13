@@ -1,7 +1,7 @@
 # IPCams
-Simple IP Camera viewer
+Simple IP Camera viewer in c#
 
-C# Forms project using LIBVLCSharp
+Windows Forms project using LIBVLCSharp
 
 View multiple camera transmitions suported by VideoLan vlc (rstp,http...) with simple zoom capability
 
