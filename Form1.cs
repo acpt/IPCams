@@ -409,12 +409,16 @@ namespace IPCams {
 
                 cam[i].MediaPlayer.Play();
                 break;
-                
+            case "Off":
+                cam[i].On = !cam[i].On;
+                camToolStripMenuItem[i].Text = "Camera " + (i + 1) + " " + (cam[i].On ? "on" : "off");
+                DoGrid(true);
+                break;
             default:
                 if (e.ClickedItem.Text.Substring(0,6)=="Camera") {
                     int c = Convert.ToInt16(e.ClickedItem.Text.Substring(6, 3))-1;
                     cam[c].On = !cam[c].On;
-                    camToolStripMenuItem[c].Text = "Camera " + (c+1) + " " + (cam[c].On ? "on" : "off");
+                    camToolStripMenuItem[c].Text = "Camera " + (c + 1) + " " + (cam[c].On ? "on" : "off");
                     DoGrid(true);
                 }
                 break;
@@ -469,6 +473,5 @@ namespace IPCams {
             Funcs.SaveCfg(cam);
         }
 
-        
     }
 }

@@ -38,10 +38,10 @@ namespace IPCams {
         /// </summary>
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
-
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.addCamToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -69,6 +69,7 @@ namespace IPCams {
             // 
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.restartToolStripMenuItem,
+            this.toolStripMenuItem1,
             this.toolStripSeparator3,
             this.addCamToolStripMenuItem,
             this.remCamToolStripMenuItem,
@@ -80,8 +81,14 @@ namespace IPCams {
             this.muteToolStripMenuItem,
             this.toolStripSeparator4});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 204);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 226);
             this.contextMenuStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.ContextMenuStrip_click);
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            this.toolStripMenuItem1.Text = "Off";
             // 
             // restartToolStripMenuItem
             // 
@@ -305,7 +312,7 @@ namespace IPCams {
         private ToolStripSeparator toolStripSeparator3;
         private ToolStripSeparator toolStripSeparator4;
         private List<ToolStripMenuItem> camToolStripMenuItem =  new List<ToolStripMenuItem>();
-
+        private ToolStripMenuItem toolStripMenuItem1;
     }
 }
 
