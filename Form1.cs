@@ -43,6 +43,7 @@ namespace IPCams {
 
             LoadCams(); 
             DoGrid();
+            AddCamsMenu();
 
             //checkTimer.Tick += new EventHandler(VerificaCams);
             //checkTimer.Interval = 30000;
@@ -50,7 +51,24 @@ namespace IPCams {
 
         }
 
-    public static string GrokCmd(string cmd) {
+        public void AddCamsMenu() {
+            //this.contextMenuStrip1.Items.Clear();
+            //InitializeComponent();
+
+            for (int i = 0; i < cam.Count; i++) {
+                
+                camToolStripMenuItem.Add(new System.Windows.Forms.ToolStripMenuItem());
+
+                camToolStripMenuItem[i].Name = "moveDownToolStripMenuItem";
+                camToolStripMenuItem[i].Size = new System.Drawing.Size(180, 22);
+                camToolStripMenuItem[i].Text = "Camera " + (i+1) + " " + (cam[i].On?"on":"off");
+
+                contextMenuStrip1.Items.Add(camToolStripMenuItem[i]);
+            }
+
+        }
+
+        public static string GrokCmd(string cmd) {
             string ip = cmd;
   
             int i = cmd.IndexOf("[");
@@ -325,72 +343,81 @@ namespace IPCams {
 
             string camRstp = "";
             switch (e.ClickedItem.Text) {
-                case "Add Cam":
-                    if (Tools.Funcs.ShowDialog(ref camRstp, "Add Camera") == DialogResult.OK) {
-                        cam.Insert(i + 1, new Janela());
-                        JanelaDefaults(cam[i + 1], GrokCmd(camRstp));
-                        DoGrid(true);
-                    }
-                    break;
-                case "Del Cam":
-                    camRstp = "Delete Cam[" + cam[i].Text +  "] ? ";
-                    if (Tools.Funcs.ShowDialog(ref camRstp, "Atention", false)==DialogResult.OK) {
-                        cam[i].MediaPlayer.Stop();
-                        cam[i].MediaPlayer.Dispose();
-                        cam.Remove(cam[i]);
-                        DoGrid(true);
-                    }
+            case "Add Cam":
+                if (Tools.Funcs.ShowDialog(ref camRstp, "Add Camera") == DialogResult.OK) {
+                    cam.Insert(i + 1, new Janela());
+                    JanelaDefaults(cam[i + 1], GrokCmd(camRstp));
+                    DoGrid(true);
+                }
+                break;
+            case "Del Cam":
+                camRstp = "Delete Cam[" + cam[i].Text +  "] ? ";
+                if (Tools.Funcs.ShowDialog(ref camRstp, "Atention", false)==DialogResult.OK) {
+                    cam[i].MediaPlayer.Stop();
+                    cam[i].MediaPlayer.Dispose();
+                    cam.Remove(cam[i]);
+                    DoGrid(true);
+                }
 
-                    break;
-                case "Edit Cam":
-                    camRstp = cam[i].Text;
-                    if (Tools.Funcs.ShowDialog(ref camRstp, "Edit") == DialogResult.OK) {
-                        //cam[i].MediaPlayer.Stop();
-                        cam[i].MediaPlayer.Dispose();
-                        cam[i].MediaPlayer = null;
-
-                        cam[i].Text = camRstp;
-                        cam[i].init(GrokCmd(camRstp));
-                        //DoGrid(true);
-                        Tools.Funcs.SaveCfg(cam);
-                    }
-                    break;
-                case "Move Up":
-                    if (i > 0) {
-                        Janela store = new Janela();
-                        store = cam[i - 1];
-                        cam[i - 1] = cam[i];
-                        cam[i] = store;
-                        DoGrid(true);
-                    }
-                    break;
-                case "Move Down":
-                    if (i < cam.Count - 1) {
-                        Janela store = new Janela();
-                        store = cam[i + 1];
-                        cam[i + 1] = cam[i];
-                        cam[i] = store;
-                        DoGrid(true);
-                    }
-                    break;
-                case "Mute/UnMute":
-                    if (cam[i].MediaPlayer.Volume == 0) {
-                        cam[i].MediaPlayer.Volume = 100;
-                    }
-                    else {
-                        cam[i].MediaPlayer.Volume = 0;
-                    }
-                    break;
-                case "Restart":
+                break;
+            case "Edit Cam":
+                camRstp = cam[i].Text;
+                if (Tools.Funcs.ShowDialog(ref camRstp, "Edit") == DialogResult.OK) {
                     //cam[i].MediaPlayer.Stop();
                     cam[i].MediaPlayer.Dispose();
                     cam[i].MediaPlayer = null;
-                    cam[i].init(GrokCmd(cam[i].Text));
+
+                    cam[i].Text = camRstp;
+                    cam[i].init(GrokCmd(camRstp));
                     //DoGrid(true);
+                    Tools.Funcs.SaveCfg(cam);
+                }
+                break;
+            case "Move Up":
+                if (i > 0) {
+                    Janela store = new Janela();
+                    store = cam[i - 1];
+                    cam[i - 1] = cam[i];
+                    cam[i] = store;
+                    DoGrid(true);
+                }
+                break;
+            case "Move Down":
+                if (i < cam.Count - 1) {
+                    Janela store = new Janela();
+                    store = cam[i + 1];
+                    cam[i + 1] = cam[i];
+                    cam[i] = store;
+                    DoGrid(true);
+                }
+                break;
+            case "Mute/UnMute":
+                if (cam[i].MediaPlayer.Volume == 0) {
+                    cam[i].MediaPlayer.Volume = 100;
+                }
+                else {
+                    cam[i].MediaPlayer.Volume = 0;
+                }
+                break;
+            case "Restart":
+                //cam[i].MediaPlayer.Stop();
+                cam[i].MediaPlayer.Dispose();
+                cam[i].MediaPlayer = null;
+                cam[i].init(GrokCmd(cam[i].Text));
+                //DoGrid(true);
 
 
-                    cam[i].MediaPlayer.Play();
-                    break;
+                cam[i].MediaPlayer.Play();
+                break;
+                
+            default:
+                if (e.ClickedItem.Text.Substring(0,6)=="Camera") {
+                    int c = Convert.ToInt16(e.ClickedItem.Text.Substring(6, 3))-1;
+                    cam[c].On = !cam[c].On;
+                    camToolStripMenuItem[c].Text = "Camera " + (c+1) + " " + (cam[c].On ? "on" : "off");
+                    DoGrid(true);
+                }
+                break;
             }
         }
 
@@ -442,5 +469,6 @@ namespace IPCams {
             Funcs.SaveCfg(cam);
         }
 
+        
     }
 }

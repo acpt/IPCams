@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 //using System.Collections.Generic;
 //using System.ComponentModel;
 using System.Data;
@@ -37,9 +38,12 @@ namespace IPCams {
         /// </summary>
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
+
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.addCamToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.remCamToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editCamToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -48,8 +52,7 @@ namespace IPCams {
             this.moveDownToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.muteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -74,10 +77,22 @@ namespace IPCams {
             this.moveUpToolStripMenuItem,
             this.moveDownToolStripMenuItem,
             this.toolStripSeparator2,
-            this.muteToolStripMenuItem});
+            this.muteToolStripMenuItem,
+            this.toolStripSeparator4});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 198);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 204);
             this.contextMenuStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.ContextMenuStrip_click);
+            // 
+            // restartToolStripMenuItem
+            // 
+            this.restartToolStripMenuItem.Name = "restartToolStripMenuItem";
+            this.restartToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.restartToolStripMenuItem.Text = "Restart";
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(177, 6);
             // 
             // addCamToolStripMenuItem
             // 
@@ -125,16 +140,10 @@ namespace IPCams {
             this.muteToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.muteToolStripMenuItem.Text = "Mute/UnMute";
             // 
-            // restartToolStripMenuItem
+            // toolStripSeparator4
             // 
-            this.restartToolStripMenuItem.Name = "restartToolStripMenuItem";
-            this.restartToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.restartToolStripMenuItem.Text = "Restart";
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(177, 6);
             // 
             // Form1
             // 
@@ -169,6 +178,11 @@ namespace IPCams {
         //int current_cams = 0;
 
         public void DoGrid(bool force=false) {
+            int CamCount = 0;
+            foreach (Janela j in cam) {
+                if (j.On) CamCount++;
+            }
+
             //load params
 
             //cria janelas carregadas, tamanho e local 
@@ -178,18 +192,18 @@ namespace IPCams {
             int dh = (int)(this.Height * (16f / 9f) / this.Width);
 
             
-            int c = (int)(Math.Sqrt(cam.Count) + .999);      
-            int r = (int)((double)cam.Count / c + .999);
+            int c = (int)(Math.Sqrt(CamCount) + .999);      
+            int r = (int)((double)CamCount / c + .999);
 
             if (dh > 1) {
                 //balanca pelas diferencas 
-                c = (int)(Math.Sqrt((double)cam.Count / dh) + .999);
-                r = (int)((double)cam.Count / c + .999);
+                c = (int)(Math.Sqrt((double)CamCount / dh) + .999);
+                r = (int)((double)CamCount / c + .999);
             }
             else
                 if (dv > 1) {
-                    r = (int)(Math.Sqrt((double)cam.Count / dv) + .999);
-                    c = (int)((double)cam.Count / r + .999);
+                    r = (int)(Math.Sqrt((double)CamCount / dv) + .999);
+                    c = (int)((double)CamCount / r + .999);
             }
 
             //Console.WriteLine ("DoGrid " + r +","+ c);
@@ -220,22 +234,24 @@ namespace IPCams {
                 //fill cams
                 int wc = 0; int wr = 0;
                 for (int i = 0; i < cam.Count; i++) {
-                    if (force) {
-                        if (cam[i].MediaPlayer != null) {
-                            cam[i].MediaPlayer.Dispose();
-                            cam[i].MediaPlayer = null;
+                    if (cam[i].On) {
+                        if (force) {
+                            if (cam[i].MediaPlayer != null) {
+                                cam[i].MediaPlayer.Dispose();
+                                cam[i].MediaPlayer = null;
+                            }
                         }
-                    }
-                    cam[i].Name = "videoView " + i; //name here case of moves - number is used to get position
-                    if (cam[i].MediaPlayer == null ) {
-                        cam[i].init(GrokCmd(cam[i].Text));
-                        //cam[i].MediaPlayer.Title = i;
-                        //cam[i].MediaPlayer.EncounteredError += delegate(object sender, EventArgs e) { MP_Error(sender, e, i); };
-                    }
-                    tableLayoutPanel1.Controls.Add(cam[i], wc, wr);
-                    wc++;
-                    if (wc >= c) {
-                        wc = 0; wr++;
+                        cam[i].Name = "videoView " + i; //name here case of moves - number is used to get position
+                        if (cam[i].MediaPlayer == null ) {
+                            cam[i].init(GrokCmd(cam[i].Text));
+                            //cam[i].MediaPlayer.Title = i;
+                            //cam[i].MediaPlayer.EncounteredError += delegate(object sender, EventArgs e) { MP_Error(sender, e, i); };
+                        }
+                        tableLayoutPanel1.Controls.Add(cam[i], wc, wr);
+                        wc++;
+                        if (wc >= c) {
+                            wc = 0; wr++;
+                        }
                     }
                 }
 
@@ -287,6 +303,9 @@ namespace IPCams {
         private ToolStripMenuItem muteToolStripMenuItem;
         private ToolStripMenuItem restartToolStripMenuItem;
         private ToolStripSeparator toolStripSeparator3;
+        private ToolStripSeparator toolStripSeparator4;
+        private List<ToolStripMenuItem> camToolStripMenuItem =  new List<ToolStripMenuItem>();
+
     }
 }
 

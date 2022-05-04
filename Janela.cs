@@ -14,6 +14,7 @@ namespace IPCams {
         public int w = 0;
         public int h = 0;
         public double s=1;
+        public bool On = true;
 
         public LibVLC _libvlc;
         public MediaPlayer _mediaPlayer;
