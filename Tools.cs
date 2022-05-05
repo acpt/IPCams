@@ -101,7 +101,7 @@ namespace Tools {
             if (cam.Count != 0) {
                 List<string> lines=new List<string>();
                 for (int i = 0; i < cam.Count; i++) {
-                    lines.Add(cam[i].Text);
+                    lines.Add(cam[i].Text + "," + (cam[i].On?"1":"0"));
                 }
                 File.WriteAllLines("IPCams.cfg",lines);
             }

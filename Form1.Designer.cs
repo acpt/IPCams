@@ -296,7 +296,15 @@ namespace IPCams {
             j.MouseMove += new System.Windows.Forms.MouseEventHandler(this.videoView_MouseMove);
 
             j.ContextMenuStrip = contextMenuStrip1;
-            j.Text = url;
+            int x = url.IndexOf(",");
+            if (x == -1) {
+                j.Text = url;
+                j.On = true;
+            }
+            else {
+                j.Text = url.Substring(0,x);
+                j.On = url.Substring(x+1)=="0"?false:true;
+            }
 
         }
         private ContextMenuStrip contextMenuStrip1;
