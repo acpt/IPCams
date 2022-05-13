@@ -311,6 +311,11 @@ namespace IPCams {
             }
 
         }
+
+        private void OpeningMenu(object sender, EventArgs e) {
+            throw new NotImplementedException();
+        }
+
         private ContextMenuStrip contextMenuStrip1;
         private ToolStripMenuItem addCamToolStripMenuItem;
         private ToolStripMenuItem remCamToolStripMenuItem;

@@ -43,7 +43,7 @@ namespace IPCams {
 
             LoadCams(); 
             DoGrid();
-            AddCamsMenu();
+            SetCamsMenu();
 
             //checkTimer.Tick += new EventHandler(VerificaCams);
             //checkTimer.Interval = 30000;
@@ -51,9 +51,14 @@ namespace IPCams {
 
         }
 
-        public void AddCamsMenu() {
-            //this.contextMenuStrip1.Items.Clear();
-            //InitializeComponent();
+        public void SetCamsMenu(int delta = 0) {
+            if (camToolStripMenuItem.Count > 0) {
+                // casp de rechamada tem de limpar o antigo
+                for (int ii = 0; ii < cam.Count + (delta == -1 ? 1 : 0); ii++) {
+                    contextMenuStrip1.Items.Remove(camToolStripMenuItem[ii]);
+                }
+                camToolStripMenuItem.Clear();
+            }
 
             for (int i = 0; i < cam.Count; i++) {
                 
@@ -61,11 +66,14 @@ namespace IPCams {
 
                 camToolStripMenuItem[i].Name = "moveDownToolStripMenuItem";
                 camToolStripMenuItem[i].Size = new System.Drawing.Size(180, 22);
-                camToolStripMenuItem[i].Text = "Camera " + (i+1) + " " + (cam[i].On?"on":"off") + "  " + GetDom(cam[i].Text);
+                camToolStripMenuItem[i].Text = CamItemText(i, cam[i]);
 
                 contextMenuStrip1.Items.Add(camToolStripMenuItem[i]);
             }
 
+        }
+        public static string CamItemText(int i, Janela j) {
+            return "Camera " + (i + 1) + " " + (j.On ? "on" : "off") + "  " + GetDom(j.Text);
         }
 
         public static string GetDom(string text) {
@@ -352,6 +360,10 @@ namespace IPCams {
             string camera = cm.SourceControl.Name;
             int i = Convert.ToInt32(camera.Substring(camera.IndexOf(" ")+1));
 
+            contextMenuStrip1.Hide();
+            //camToolStripMenuItem[i].BackColor = Color.Brown;
+
+
             string camRstp = "";
             switch (e.ClickedItem.Text) {
             case "Add Cam":
@@ -359,6 +371,7 @@ namespace IPCams {
                     cam.Insert(i + 1, new Janela());
                     JanelaDefaults(cam[i + 1], GrokCmd(camRstp));
                     DoGrid(true);
+                    SetCamsMenu();
                 }
                 break;
             case "Del Cam":
@@ -368,9 +381,9 @@ namespace IPCams {
                     cam[i].MediaPlayer.Dispose();
                     cam.Remove(cam[i]);
                     DoGrid(true);
+                    SetCamsMenu();
                 }
-
-                break;
+            break;
             case "Edit Cam":
                 camRstp = cam[i].Text;
                 if (Tools.Funcs.ShowDialog(ref camRstp, "Edit") == DialogResult.OK) {
@@ -391,8 +404,9 @@ namespace IPCams {
                     cam[i - 1] = cam[i];
                     cam[i] = store;
                     DoGrid(true);
+                    SetCamsMenu();
                 }
-                break;
+            break;
             case "Move Down":
                 if (i < cam.Count - 1) {
                     Janela store = new Janela();
@@ -400,8 +414,9 @@ namespace IPCams {
                     cam[i + 1] = cam[i];
                     cam[i] = store;
                     DoGrid(true);
+                    SetCamsMenu();            
                 }
-                break;
+            break;
             case "Mute/UnMute":
                 if (cam[i].MediaPlayer.Volume == 0) {
                     cam[i].MediaPlayer.Volume = 100;
@@ -422,14 +437,14 @@ namespace IPCams {
                 break;
             case "Off":
                 cam[i].On = !cam[i].On;
-                camToolStripMenuItem[i].Text = "Camera " + (i + 1) + " " + (cam[i].On ? "on" : "off");
-                DoGrid(true);
+                camToolStripMenuItem[i].Text = CamItemText(i, cam[i]);
+            DoGrid(true);
                 break;
             default:
                 if (e.ClickedItem.Text.Substring(0,6)=="Camera") {
                     int c = Convert.ToInt16(e.ClickedItem.Text.Substring(6, 3))-1;
                     cam[c].On = !cam[c].On;
-                    camToolStripMenuItem[c].Text = "Camera " + (c + 1) + " " + (cam[c].On ? "on" : "off");
+                    camToolStripMenuItem[c].Text = CamItemText(c, cam[c]);
                     DoGrid(true);
                 }
                 break;
