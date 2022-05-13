@@ -61,13 +61,24 @@ namespace IPCams {
 
                 camToolStripMenuItem[i].Name = "moveDownToolStripMenuItem";
                 camToolStripMenuItem[i].Size = new System.Drawing.Size(180, 22);
-                camToolStripMenuItem[i].Text = "Camera " + (i+1) + " " + (cam[i].On?"on":"off");
+                camToolStripMenuItem[i].Text = "Camera " + (i+1) + " " + (cam[i].On?"on":"off") + "  " + GetDom(cam[i].Text);
 
                 contextMenuStrip1.Items.Add(camToolStripMenuItem[i]);
             }
 
         }
 
+        public static string GetDom(string text) {
+            string rt = "";
+            int i1 = text.IndexOf("@");
+            if (i1 != -1) {
+                int i2 = text.IndexOf(":", i1);
+                if (i2 != -1) {
+                    rt = text.Substring(i1 + 1, i2 - i1 - 1);
+                }
+            }
+            return rt;
+        }
         public static string GrokCmd(string cmd) {
             string ip = cmd;
   
