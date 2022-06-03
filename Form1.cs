@@ -55,7 +55,10 @@ namespace IPCams {
             if (camToolStripMenuItem.Count > 0) {
                 // casp de rechamada tem de limpar o antigo
                 for (int ii = 0; ii < cam.Count + (delta == -1 ? 1 : 0); ii++) {
-                    contextMenuStrip1.Items.Remove(camToolStripMenuItem[ii]);
+                    try {
+                        contextMenuStrip1.Items.Remove(camToolStripMenuItem[ii]);
+                    }
+                    catch { }
                 }
                 camToolStripMenuItem.Clear();
             }

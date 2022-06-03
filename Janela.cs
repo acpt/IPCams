@@ -34,7 +34,8 @@ namespace IPCams {
 
             this.MediaPlayer = _mediaPlayer;
             try {
-                this.MediaPlayer.Play(new Media(_libvlc, new Uri(URL)));
+                Uri _url = new Uri(URL.Replace("#", "%23"));
+                this.MediaPlayer.Play(new Media(_libvlc, _url));
             }
             catch (InvalidCastException e) {
 
