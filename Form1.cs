@@ -36,9 +36,6 @@ namespace IPCams {
         
         public Form1() {
             InitializeComponent();
-            this.Text = "IPCams 240205";
-            this.Refresh();
-
 
             Funcs.LoadCfg(ref Loadipcams);
 
@@ -102,19 +99,20 @@ namespace IPCams {
                 //IPTools.AutoClosingMessageBox.Show("[" + mac + "]","Procurando...",3000);
                 //Funcs.MessageBoxTimeout((System.IntPtr)0, "[" + mac + "]" , "Procura de Mac's", 0, 0, 2000);
 
-                ip = Tools.ARP.GetIPfromMAC(mac);
+                //ip = Tools.ARP.GetIPfromMAC(mac);
+                ip = IPMacMapper.FindIPFromMacAddress(mac);
                 //Funcs.Ping255("192.168.1.1");
                 if (ip == "") {
                     Tools.AutoClosingMessageBox.Show("Falhou a procura do mac address [" + mac + "] ! A acordar o Arp","...",5000);
-                    string localIP = IPFuncs.GetLocalIPAddress();
-                    IPFuncs.Ping255(localIP);
-                    Thread.Sleep(7000);
-                    //segunda tentativa
-                    ip = Tools.ARP.GetIPfromMAC(mac);
-                    if (ip == "") { //
-                        Tools.AutoClosingMessageBox.Show("Não encontrado, tente sair e voltar a entrar", "Procura de Mac's", 5000);
-                        ip = "127.0.0.1";
-                    }
+                    //string localIP = IPFuncs.GetLocalIPAddress();
+                    //IPFuncs.Ping255(localIP);
+                    //Thread.Sleep(7000);
+                    ////segunda tentativa
+                    //ip = Tools.ARP.GetIPfromMAC(mac);
+                    //if (ip == "") { //
+                    //    Tools.AutoClosingMessageBox.Show("Não encontrado, tente sair e voltar a entrar", "Procura de Mac's", 5000);
+                    //    ip = "127.0.0.1";
+                    //}
 
                 }
                 ip = cmd.Substring(0, cmd.IndexOf("[")) + ip + cmd.Substring(cmd.IndexOf("]") + 1);
