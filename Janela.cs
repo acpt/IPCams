@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+//using System.Web;
 using LibVLCSharp.Shared;
 
 namespace IPCams {
@@ -23,6 +24,7 @@ namespace IPCams {
             URL=url;
             if (url=="") return;
             _libvlc = new LibVLC();
+            //URL = HttpUtility.UrlEncode(url);
 
             _mediaPlayer = new MediaPlayer(_libvlc);
             _mediaPlayer.EnableHardwareDecoding = false;
@@ -33,7 +35,7 @@ namespace IPCams {
 
             this.MediaPlayer = _mediaPlayer;
             try {
-                this.MediaPlayer.Play(new Media(_libvlc, new Uri(URL)));
+                this.MediaPlayer.Play(new Media(_libvlc, new Uri(URL.Replace("#","%23"))));
             }
             catch (InvalidCastException e) {
 
