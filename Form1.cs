@@ -36,6 +36,9 @@ namespace IPCams {
         
         public Form1() {
             InitializeComponent();
+            this.Text = "IPCams 240205";
+            this.Refresh();
+
 
             Funcs.LoadCfg(ref Loadipcams);
 

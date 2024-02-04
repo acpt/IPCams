@@ -181,9 +181,6 @@ namespace IPCams {
         #endregion
 
 
-
-
-
         int current_c = 0;
         int current_r = 0;
         //int current_cams = 0;
